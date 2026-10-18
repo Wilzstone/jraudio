@@ -1,0 +1,10 @@
+.smart-form {background:#fff;color:#23272e;border-radius:16px;box-shadow:0 9px 30px rgba(0,0,0,.11);padding:28px}
+.smart-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.smart-form label {display:flex;flex-direction:column;font-weight:600;gap:8px}
+.smart-form input:not([type=checkbox]),.smart-form select {width:100%;padding:13px;border:1px solid #cad2df;border-radius:8px;font:inherit}
+.smart-form .smart-check {display:flex;align-items:center;flex-direction:row;gap:8px;margin-top:20px;font-size:.95rem}
+.smart-hint {color:#606975;font-size:.94rem;margin:20px 0}
+.smart-btn{border:0;cursor:pointer;font:inherit}
+.smart-result,.smart-notes{background:#fff;color:#263142;padding:24px;border-radius:15px;box-shadow:0 6px 24px rgba(0,0,0,.09);margin-top:22px}
+.smart-table-wrap {overflow:auto}.smart-table{border-collapse:collapse;width:100%;min-width:690px}.smart-table th,.smart-table td{border-bottom:1px solid #e2e5ec;text-align:left;padding:14px 12px;vertical-align:top}.smart-table th{background:#f3f5f9}.smart-table td small{display:block;color:#64748b;padding-top:3px}.smart-totals{display:flex;justify-content:space-between;gap:12px;padding:20px 0;border-top:1px solid #eee}.smart-totals p{font-size:.86rem;margin:6px 0}.smart-notes li{margin:8px 0}
+@media(max-width:700px){.smart-grid{grid-template-columns:1fr}.smart-form{padding:18px}}

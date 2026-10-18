@@ -1,0 +1,486 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    min-height: 100%;
+}
+
+body {
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    background: #f5f7fb;
+    color: #222;
+    display: flex;
+    flex-direction: column;
+}
+
+.navbar {
+    background: #111827;
+    color: white;
+    padding: 16px 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+}
+
+.brand-link {
+    display: inline-flex;
+    align-items: center;
+    background: #fff;
+    border-radius: 10px;
+    padding: 4px 8px;
+}
+
+.brand-logo-public {
+    height: 42px;
+    width: auto;
+    display: block;
+}
+
+.navbar ul {
+    display: flex;
+    gap: 18px;
+    list-style: none;
+    align-items: center;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.login-btn {
+    background: #dc2626;
+    padding: 8px 14px;
+    border-radius: 8px;
+}
+
+.hero {
+    min-height: 420px;
+    background: linear-gradient(135deg, #111827, #991b1b);
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 60px;
+}
+
+.hero-content {
+    max-width: 650px;
+}
+
+.hero-logo {
+    width: 310px;
+    max-width: 100%;
+    background: #fff;
+    border-radius: 14px;
+    padding: 8px 12px;
+    margin-bottom: 22px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+}
+
+.hero h1 {
+    font-size: 44px;
+    margin-bottom: 16px;
+}
+
+.hero p {
+    font-size: 18px;
+    margin-bottom: 28px;
+    line-height: 1.6;
+}
+
+.hero-actions,
+.contact-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-small {
+    display: inline-block;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.btn-primary {
+    background: #dc2626;
+    padding: 12px 22px;
+}
+
+.btn-secondary {
+    background: #111827;
+    padding: 12px 22px;
+}
+
+.btn-small {
+    background: #dc2626;
+    padding: 9px 14px;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-small:hover {
+    transform: translateY(-1px);
+    opacity: 0.9;
+}
+
+.section {
+    padding: 45px 60px;
+}
+
+.section h2 {
+    margin-bottom: 24px;
+}
+
+.page-header {
+    background: #1f2937;
+    color: white;
+    padding: 45px 60px;
+}
+
+.page-header h1 {
+    font-size: 36px;
+    margin-bottom: 8px;
+}
+
+.card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 18px;
+}
+
+.card {
+    background: white;
+    padding: 22px;
+    border-radius: 14px;
+    box-shadow: 0 5px 18px rgba(0,0,0,0.08);
+}
+
+.card h3 {
+    margin-bottom: 12px;
+    color: #111827;
+}
+
+.card p {
+    margin-bottom: 8px;
+}
+
+.price {
+    font-weight: bold;
+    color: #dc2626;
+    font-size: 18px;
+}
+
+.text-section {
+    max-width: 900px;
+    line-height: 1.8;
+}
+
+.info-box {
+    background: white;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 12px;
+    box-shadow: 0 5px 18px rgba(0,0,0,0.08);
+}
+
+.about-logo {
+    width: 260px;
+    max-width: 100%;
+    display: block;
+    background: #fff;
+    border-radius: 12px;
+    margin-bottom: 18px;
+}
+
+.contact-list a,
+.info-box a {
+    color: #dc2626;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.contact-list a:hover,
+.info-box a:hover {
+    text-decoration: underline;
+}
+
+.map-placeholder {
+    background: #d1d5db;
+    min-height: 260px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #374151;
+    margin-top: 20px;
+}
+
+.map-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    text-align: center;
+    color: #111827;
+    padding: 20px;
+}
+
+.map-card h3 {
+    margin-bottom: 8px;
+}
+
+footer {
+    background: #111827;
+    color: white;
+    text-align: center;
+    padding: 18px;
+    margin-top: auto;
+}
+
+.footer-brand {
+    margin-bottom: 10px;
+}
+
+.footer-logo {
+    width: 180px;
+    max-width: 90%;
+    background: #fff;
+    border-radius: 10px;
+    padding: 5px 8px;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+    font-size: 14px;
+}
+
+.footer-links a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        padding: 14px 22px;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .navbar ul {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .brand-logo-public {
+        height: 38px;
+    }
+
+    .hero {
+        padding: 42px 24px;
+    }
+
+    .hero h1 {
+        font-size: 32px;
+    }
+
+    .section,
+    .page-header {
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+}
+
+
+
+/* === JR Audio Public Finishing: Paket, Galeri, Partner === */
+.brand-link{display:flex;align-items:center;gap:10px;color:white;text-decoration:none}
+.brand-mark{width:38px;height:38px;border-radius:12px;background:#2563eb;display:inline-flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;box-shadow:0 8px 24px rgba(37,99,235,.35)}
+.navbar{position:sticky;top:0;z-index:50}
+.navbar ul{flex-wrap:wrap}
+.eyebrow{display:inline-block;color:#2563eb;font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.section-title{max-width:760px;margin:0 auto 32px;text-align:center}
+.section-title h2{font-size:34px;margin-bottom:10px;color:#111827}
+.section-title p{color:#6b7280;line-height:1.7}
+.section-title.light h2,.section-title.light p{color:white}
+.page-header-gradient{background:linear-gradient(135deg,#111827,#1d4ed8)}
+.section-soft{background:#eef4ff}
+.section-dark{background:linear-gradient(135deg,#111827,#1f2937);color:white}
+.center{text-align:center;margin-top:24px}
+.btn-light{display:inline-block;background:white;color:#111827;text-decoration:none;padding:12px 22px;border-radius:10px;font-weight:700}
+.paket-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.paket-card,.paket-mini-card,.gallery-item,.partner-card{background:white;border-radius:18px;overflow:hidden;box-shadow:0 12px 32px rgba(15,23,42,.10)}
+.paket-card{display:flex;flex-direction:column;transition:.25s ease}
+.paket-card:hover,.paket-mini-card:hover{transform:translateY(-6px)}
+.paket-highlight{outline:3px solid rgba(37,99,235,.25)}
+.paket-card img{width:100%;height:210px;object-fit:cover}
+.paket-body{padding:24px}
+.badge-soft{display:inline-block;background:#dbeafe;color:#1d4ed8;padding:7px 10px;border-radius:999px;font-size:12px;font-weight:800;margin-bottom:12px}
+.paket-body h3{font-size:24px;margin-bottom:8px}
+.paket-body p{color:#6b7280;line-height:1.6}
+.paket-body ul{padding-left:18px;margin:18px 0;color:#374151;line-height:1.8}
+.paket-price{color:#2563eb;font-size:22px;font-weight:800;margin-bottom:18px}
+.paket-mini-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.paket-mini-card{text-decoration:none;color:#111827;padding-bottom:22px;transition:.25s ease}
+.paket-mini-card img{width:100%;height:170px;object-fit:cover}
+.paket-mini-card h3,.paket-mini-card p{padding:0 18px}
+.paket-mini-card h3{margin-top:18px}
+.paket-mini-card p{color:#6b7280}
+.gallery-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.gallery-item img{width:100%;height:260px;object-fit:cover}
+.gallery-item div{padding:20px}
+.gallery-item h3{margin-bottom:6px}
+.gallery-item p{color:#6b7280}
+.gallery-preview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.gallery-preview img{width:100%;height:220px;object-fit:cover;border-radius:18px;box-shadow:0 12px 28px rgba(15,23,42,.12)}
+.partner-grid,.partner-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.partner-card{padding:18px}
+.partner-card img,.partner-strip img{width:100%;border-radius:16px;box-shadow:0 10px 24px rgba(15,23,42,.08)}
+@media(max-width:900px){.paket-grid,.paket-mini-grid,.gallery-grid,.gallery-preview,.partner-grid,.partner-strip{grid-template-columns:1fr}.section{padding:34px 22px}.page-header{padding:38px 22px}.navbar{padding:14px 22px;align-items:flex-start;gap:14px}.navbar ul{gap:10px}}
+
+
+
+/* === Update paket owner JR Audio === */
+.brand-logo{height:42px;width:auto;max-width:120px;object-fit:contain;display:block}
+.paket-grid-2{grid-template-columns:repeat(2,minmax(0,1fr));max-width:980px;margin:0 auto}
+.paket-highlight-red{outline:3px solid rgba(220,38,38,.20)}
+.badge-red{background:#fee2e2;color:#dc2626}
+.info-card-wide{max-width:780px;margin:0 auto;background:white;border-radius:20px;padding:28px;box-shadow:0 12px 32px rgba(15,23,42,.10);text-align:center}
+.info-card-wide h3{font-size:26px;margin-bottom:12px}
+.info-card-wide p{color:#4b5563;line-height:1.7}
+.event-list-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.event-list-grid span{background:#fff;border:1px solid #e5e7eb;border-radius:999px;padding:12px 16px;text-align:center;font-weight:700;color:#111827;box-shadow:0 8px 20px rgba(15,23,42,.06)}
+.collab-grid,.partner-name-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.collab-card,.partner-name-card{background:white;border-radius:18px;padding:24px;box-shadow:0 12px 32px rgba(15,23,42,.10);text-align:center}
+.collab-card h3{color:#111827;margin-bottom:8px}
+.collab-card p{color:#6b7280;line-height:1.6}
+.partner-name-card{font-size:22px;font-weight:800;color:#1d4ed8}
+@media(max-width:900px){.paket-grid-2,.event-list-grid,.collab-grid,.partner-name-grid{grid-template-columns:1fr}}
+
+
+
+/* === Revisi transaksi paket, public WA, galeri video === */
+.video-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.video-card{background:#fff;border-radius:18px;padding:18px;box-shadow:0 12px 32px rgba(15,23,42,.10)}
+.video-card video{width:100%;border-radius:14px;background:#111827}
+.video-card h3{margin-top:12px}
+@media(max-width:900px){.video-grid{grid-template-columns:1fr}}
+
+/* === Final revisi paket transaksi === */
+.collab-logo{width:100%;max-height:110px;object-fit:contain;margin-bottom:14px;border-radius:14px}
+.external-field{display:none}
+
+
+
+/* === Finishing navbar active + partner final === */
+.navbar ul li a {
+    position: relative;
+    transition: all 0.2s ease;
+    border-radius: 999px;
+    padding: 8px 12px;
+}
+
+.navbar ul li a:hover,
+.navbar ul li a.active {
+    background: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+}
+
+.navbar ul li a::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 2px;
+    width: 0;
+    height: 2px;
+    background: #60a5fa;
+    border-radius: 999px;
+    transform: translateX(-50%);
+    transition: width 0.2s ease;
+}
+
+.navbar ul li a:hover::after,
+.navbar ul li a.active::after {
+    width: 58%;
+}
+
+.partner-final-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.collab-logo {
+    width: 100%;
+    max-height: 110px;
+    object-fit: contain;
+    margin-bottom: 14px;
+    border-radius: 14px;
+}
+
+@media (max-width: 1100px) {
+    .partner-final-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 700px) {
+    .partner-final-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+
+/* === Navbar hover & active only === */
+.public-navbar ul li a {
+    position: relative;
+    transition: all 0.2s ease;
+    border-radius: 999px;
+    padding: 8px 12px;
+}
+
+.public-navbar ul li a:hover,
+.public-navbar ul li a.active {
+    background: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+}
+
+.public-navbar ul li a::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 2px;
+    width: 0;
+    height: 2px;
+    background: #60a5fa;
+    border-radius: 999px;
+    transform: translateX(-50%);
+    transition: width 0.2s ease;
+}
+
+.public-navbar ul li a:hover::after,
+.public-navbar ul li a.active::after {
+    width: 58%;
+}

@@ -1,0 +1,87 @@
+.brand-logo-admin {
+    height: 34px;
+    width: auto;
+    background: #fff;
+    border-radius: 8px;
+    padding: 3px 8px;
+}
+
+.brand-logo-login {
+    width: 230px;
+    max-width: 100%;
+    display: block;
+    margin: 0 auto 12px;
+}
+
+.invoice-logo {
+    width: 230px;
+    max-width: 100%;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.print-report-header {
+    display: none;
+}
+
+.report-print-logo {
+    width: 240px;
+    max-width: 100%;
+    display: block;
+    margin-bottom: 8px;
+}
+
+@media print {
+    .print-report-header {
+        display: flex !important;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 20px;
+        border-bottom: 1px solid #000;
+        padding-bottom: 12px;
+        margin-bottom: 18px;
+    }
+
+    .report-print-logo {
+        width: 220px;
+    }
+
+    .invoice-logo {
+        width: 220px;
+    }
+}
+
+
+
+/* === Admin navbar hover & active only === */
+.admin-navbar .nav-link {
+    position: relative;
+    border-radius: 999px;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    transition: all 0.2s ease;
+}
+
+.admin-navbar .nav-link:hover,
+.admin-navbar .nav-link.active {
+    background: rgba(255, 255, 255, 0.16);
+    color: #ffffff !important;
+}
+
+.admin-navbar .nav-link::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 2px;
+    width: 0;
+    height: 2px;
+    background: #60a5fa;
+    border-radius: 999px;
+    transform: translateX(-50%);
+    transition: width 0.2s ease;
+}
+
+.admin-navbar .nav-link:hover::after,
+.admin-navbar .nav-link.active::after {
+    width: 58%;
+}
