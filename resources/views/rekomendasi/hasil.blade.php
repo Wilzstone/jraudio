@@ -1,31 +1,8 @@
 @include('public.header')
-<main class="section" style="max-width:1100px;margin:0 auto;padding-top:36px">
-    <div class="section-title"><span class="eyebrow">JR Audio Smart System</span><h2>Hasil Rekomendasi</h2>
-        <p>{{ ucfirst($input['jenis_acara']) }} · {{ number_format((int)$input['jumlah_peserta'],0,',','.') }} peserta · {{ ucfirst($input['lokasi']) }} · {{ $input['tanggal_acara'] }}</p>
-    </div>
-    <div class="smart-result">
-        @if(count($hasil['barang']))
-            <div class="smart-table-wrap"><table class="smart-table"><thead><tr><th>Barang</th><th>Qty</th><th>Harga/unit</th><th>Subtotal</th><th>Alasan</th></tr></thead><tbody>
-                @foreach($hasil['barang'] as $row)
-                    <tr>
-                        <td><strong>{{ $row['nama_barang'] }}</strong><small>{{ $row['kategori'] }} · stok sekarang {{ $row['stok_saat_ini'] }}</small></td>
-                        <td>{{ $row['jumlah'] }}</td><td>Rp {{ number_format($row['harga_satuan'],0,',','.') }}</td>
-                        <td>Rp {{ number_format($row['subtotal'],0,',','.') }}</td><td>{{ $row['alasan'] }}</td>
-                    </tr>
-                @endforeach
-            </tbody></table></div>
-        @else
-            <p>Tidak ada barang yang dapat disarankan dari stok yang tersedia sekarang. Hubungi JR Audio untuk konsultasi.</p>
-        @endif
-        <div class="smart-totals"><div><strong>Estimasi total</strong><p>Harga sewa satuan (bukan harga paket)</p></div><strong>Rp {{ number_format($hasil['total'],0,',','.') }}</strong></div>
-        <p><strong>Anggaran:</strong> Rp {{ number_format($hasil['anggaran'],0,',','.') }} —
-            {{ $hasil['sesuai_anggaran'] ? 'Estimasi dalam anggaran' : 'Estimasi melewati anggaran' }}</p>
-        <p><strong>Paket yang bisa dikonsultasikan:</strong> {{ $hasil['paket_hint'] }}. Nama paket hanya alternatif diskusi, bukan otomatis daftar yang dihitung di atas.</p>
-    </div>
-    <div class="smart-notes"><h3>Catatan penting</h3><ul>@foreach($hasil['catatan'] as $note)<li>{{ $note }}</li>@endforeach</ul></div>
-    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:22px">
-        <a href="{{ route('rekomendasi.index') }}" class="btn-primary">Ubah Detail Acara</a>
-        <a target="_blank" rel="noopener" href="https://wa.me/6282331745445?text={{ rawurlencode('Halo JR Audio, saya ingin konsultasi kebutuhan sound system untuk '.$input['jenis_acara'].' dengan '.$input['jumlah_peserta'].' peserta pada '.$input['tanggal_acara'].'. Estimasi dari website Rp '.number_format($hasil['total'],0,',','.').'. Mohon rekomendasi teknis dan ketersediaan.') }}" class="btn-primary">Konsultasi via WhatsApp</a>
-    </div>
-</main>
-@include('public.footer')
+<main id="main-content"><section class="page-hero smart-page-hero"><div class="container"><span class="eyebrow eyebrow-light">✦ &nbsp; JR SMART SYSTEM</span><h1>Rekomendasi awal<br><em>untuk acaramu.</em></h1><p>Berikut susunan perlengkapan yang disarankan berdasarkan informasi yang kamu masukkan.</p></div></section>
+<section class="section section-ivory"><div class="container result-layout"><div class="result-main"><div class="result-overview"><span class="eyebrow">RINGKASAN KEBUTUHAN</span><div class="overview-tags"><span>Jenis: <b>{{ ucfirst($input['jenis_acara']) }}</b></span><span>Peserta: <b>{{ number_format((int)$input['jumlah_peserta'],0,',','.') }}</b></span><span>Lokasi: <b>{{ ucfirst($input['lokasi']) }}</b></span><span>Tanggal: <b>{{ $input['tanggal_acara'] }}</b></span></div></div><div class="result-heading"><div><span class="eyebrow">EQUIPMENT SUGGESTION</span><h2>Daftar perlengkapan</h2></div><span class="result-count">{{ count($hasil['barang']) }} jenis barang</span></div>
+@if(count($hasil['barang']))<div class="result-table-wrap"><table class="result-table"><thead><tr><th>Barang</th><th>Jumlah</th><th>Harga satuan</th><th>Subtotal</th></tr></thead><tbody>@foreach($hasil['barang'] as $row)<tr><td><strong>{{ $row['nama_barang'] }}</strong><small>{{ $row['kategori'] }} · stok tercatat {{ $row['stok_saat_ini'] }}</small><span class="result-why">{{ $row['alasan'] }}</span></td><td><strong>{{ number_format((int)$row['jumlah'],0,',','.') }} unit</strong></td><td>Rp {{ number_format((int)$row['harga_satuan'],0,',','.') }}</td><td><strong>Rp {{ number_format((int)$row['subtotal'],0,',','.') }}</strong></td></tr>@endforeach</tbody></table></div>
+@else<div class="empty-state">Belum ada barang yang bisa direkomendasikan dari stok yang tercatat saat ini. Silakan konsultasikan alternatif dengan JR Audio.</div>@endif
+<div class="result-notes"><span class="eyebrow">CATATAN REKOMENDASI</span><ul>@foreach($hasil['catatan'] as $note)<li>{{ $note }}</li>@endforeach</ul><p><strong>Alternatif paket untuk diskusi:</strong> {{ $hasil['paket_hint'] }}. Paket ini tidak otomatis termasuk estimasi sewa satuan di atas.</p></div>
+</div><aside class="result-aside"><div class="estimate-card"><span>ESTIMASI BIAYA</span><h3>Rp {{ number_format((int)$hasil['total'],0,',','.') }}</h3><p>Total estimasi dari barang satuan yang disarankan, bukan total booking.</p><div class="estimate-sep"></div><div class="estimate-line"><span>Anggaran</span><strong>Rp {{ number_format((int)$hasil['anggaran'],0,',','.') }}</strong></div><span class="estimate-status {{ $hasil['sesuai_anggaran'] ? 'status-ok' : 'status-warn' }}">{{ $hasil['sesuai_anggaran'] ? 'Estimasi dalam anggaran' : 'Estimasi melebihi anggaran' }}</span><p class="estimate-disclaimer">Harga dan stok untuk tanggal acara harus dikonfirmasi langsung dengan JR Audio.</p><a class="button button-red" href="https://wa.me/6282331745445?text={{ rawurlencode('Halo JR Audio, saya ingin konsultasi kebutuhan '.$input['jenis_acara'].' untuk '.$input['jumlah_peserta'].' peserta tanggal '.$input['tanggal_acara'].'. Estimasi website Rp '.number_format($hasil['total'],0,',','.').'. Mohon konfirmasi ketersediaan dan detail teknis.') }}" target="_blank" rel="noopener noreferrer">Konsultasi via WhatsApp ↗</a><a class="button button-outline" href="{{ route('rekomendasi.index') }}">← Ubah Detail Acara</a></div></aside></div></section>
+</main>@include('public.footer')
