@@ -1,0 +1,74 @@
+/* JR Audio shared admin shell — overrides dashboard shell and styles legacy Bootstrap admin screens. */
+.ja-app {display:flex;min-height:100vh}
+.ja-sidebar {width:254px;flex:none;position:fixed;inset:0 auto 0 0;z-index:50;display:flex;flex-direction:column;background:#171920;color:#fff;padding:24px 17px 20px;overflow-y:auto}
+.ja-logo {display:flex;align-items:center;justify-content:center;margin:0 auto 35px;padding:0;width:84px;height:84px;border-radius:22px;background:#252831;text-decoration:none;transition:transform .2s,background .2s}
+.ja-logo:hover {background:#343743;transform:translateY(-1px)}
+.ja-brand-mark {width:68px;height:68px;object-fit:contain;border-radius:15px;display:block}
+.ja-navigation {display:flex;flex-direction:column;gap:5px}
+.ja-nav-link {position:relative;border-radius:10px;display:flex;align-items:center;padding:12px 13px;gap:12px;color:#a6aab7;font-size:13px;font-weight:600;text-decoration:none;transition:background .18s,color .18s}
+.ja-nav-link:hover,.ja-nav-link:focus-visible {background:#292b33;color:#fff}
+.ja-nav-link.is-active {background:#343038;color:#fff}
+.ja-nav-link.is-active:before {content:"";background:#f43d45;position:absolute;inset:10px auto 10px 0;width:3px;border-radius:5px}
+.ja-nav-symbol {display:inline-grid;place-items:center;width:22px;flex:none;font-size:18px;color:#9094a1;font-weight:600}
+.ja-nav-link.is-active .ja-nav-symbol {color:#ff626a}
+.ja-active-dot {margin-left:auto;width:6px;height:6px;background:#ff525a;border-radius:50%}
+.ja-main {margin-left:254px;flex:1;min-width:0}
+.ja-topbar {height:78px;background:#fff;border-bottom:1px solid #eff0f2;padding:0 42px;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:25}
+.ja-topbar-left,.ja-topbar-right {display:flex;align-items:center;gap:13px;min-width:0}
+.ja-breadcrumb {font-weight:800;font-size:10px;letter-spacing:1.2px;color:#a8acb6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ja-breadcrumb span {color:#ddd;margin:0 8px}.ja-breadcrumb strong {color:#343845}
+.ja-mobile-menu {display:none;border:0;background:#f4f5f8;border-radius:8px;padding:7px 12px;color:#222;cursor:pointer}
+.ja-user-menu {position:relative;color:#252937;font-size:12px}
+.ja-user-trigger {display:flex;align-items:center;gap:10px;padding:6px 9px;cursor:pointer;border:1px solid transparent;border-radius:12px;list-style:none;user-select:none;min-height:51px}
+.ja-user-trigger::-webkit-details-marker {display:none}
+.ja-user-trigger::marker {content:""}
+.ja-user-trigger:hover,.ja-user-menu[open] .ja-user-trigger {background:#f5f6f8;border-color:#eceef3}
+.ja-topbar-avatar {background:#fcedee;color:#cf2c37;display:grid;place-items:center;border-radius:12px;width:36px;height:36px;flex:none;font-size:13px;font-weight:800}
+.ja-user-details {display:flex;flex-direction:column;gap:3px;max-width:170px;min-width:0;line-height:1.3}
+.ja-user-details strong {font-size:12px;color:#222633;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
+.ja-user-details small {font-size:10px;color:#9096a2}
+.ja-user-chevron {font-size:19px;color:#949aa6;margin-left:5px}
+.ja-user-dropdown {position:absolute;right:0;top:calc(100% + 9px);z-index:60;width:255px;background:#fff;border:1px solid #e6e8ee;border-radius:14px;box-shadow:0 18px 50px rgba(22,27,40,.16);padding:8px}
+.ja-user-dropdown-heading {display:flex;flex-direction:column;gap:4px;padding:12px 12px 13px;border-bottom:1px solid #f1f2f5;margin-bottom:5px;overflow-wrap:anywhere}
+.ja-user-dropdown-heading strong{font-size:12px}.ja-user-dropdown-heading small{font-size:10px;color:#89909d}
+.ja-user-dropdown a,.ja-signout {display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;border:0;border-radius:8px;background:none;color:#333947;font-size:12px;text-decoration:none;padding:12px;cursor:pointer;text-align:left}
+.ja-user-dropdown a:hover {background:#f5f6f9;color:#171920}
+.ja-signout {color:#cd2f3b;font-weight:750}.ja-signout:hover {background:#fff0f1;color:#b32431}
+.ja-user-dropdown form {margin:0}
+.ja-sidebar-scrim {display:none}
+/* Regular admin screens: keep Bootstrap tables/forms intact */
+body.ja-admin-page {margin:0;background:#f5f6f9;color:#191c26}
+.ja-admin-page .ja-admin-content {padding:32px 36px 40px;max-width:1620px;margin:0 auto;min-width:0;overflow-x:auto}
+.ja-admin-page .ja-admin-content>h1,.ja-admin-page .ja-admin-content>h2,.ja-admin-page .ja-admin-content>h3 {font-weight:750}
+.ja-admin-page .ja-admin-content .table {background:#fff;--bs-table-bg:#fff}
+.ja-admin-page .ja-admin-content .table-responsive {border-radius:12px}
+.ja-admin-page .ja-admin-content .card {border-color:#e9ebf1;border-radius:14px}
+.ja-admin-page .ja-admin-content .btn-primary {background:#e82f38;border-color:#e82f38}
+.ja-admin-page .ja-admin-content .btn-primary:hover {background:#c92832;border-color:#c92832}
+.ja-admin-page .ja-admin-content .form-control:focus,.ja-admin-page .ja-admin-content .form-select:focus {border-color:#ef737a;box-shadow:0 0 0 .2rem rgba(232,47,56,.12)}
+@media(max-width:900px){
+ .ja-sidebar{transform:translateX(-105%);transition:transform .2s}
+ .ja-app.menu-open .ja-sidebar{transform:translateX(0)}
+ .ja-app.menu-open .ja-sidebar-scrim{display:block;position:fixed;inset:0;background:rgba(17,20,28,.55);z-index:40}
+ .ja-main{margin-left:0}
+ .ja-mobile-menu{display:inline-flex;align-items:center;justify-content:center}
+ .ja-topbar{padding:0 23px}
+ .ja-admin-page .ja-admin-content{padding:24px 20px 35px}
+}
+@media(max-width:630px){
+ .ja-topbar{height:66px;padding:0 14px}
+ .ja-user-details{max-width:90px}.ja-user-details strong{font-size:11px}
+ .ja-user-chevron{margin-left:0}.ja-topbar-left{gap:8px}.ja-breadcrumb{font-size:9px;letter-spacing:.3px}
+ .ja-breadcrumb span{margin:0 3px}
+ .ja-admin-page .ja-admin-content{padding:20px 14px 35px}
+ .ja-user-dropdown{right:0;width:min(255px,calc(100vw - 24px))}
+}
+@media(prefers-reduced-motion:reduce){.ja-sidebar,.ja-logo,.ja-nav-link{transition:none!important}}
+
+.ja-nav-symbol svg {width:19px;height:19px;display:block;flex:none}
+@media print {
+  .ja-sidebar,.ja-sidebar-scrim,.ja-topbar {display:none!important}
+  .ja-main {margin-left:0!important}
+  .ja-admin-page .ja-admin-content {padding:0!important;overflow:visible!important}
+  body.ja-admin-page {background:#fff!important}
+}

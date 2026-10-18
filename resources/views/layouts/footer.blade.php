@@ -1,4 +1,7 @@
+        </div>
+    </main>
 </div>
+<script src="{{ asset('assets/js/admin-shell.js') }}" defer></script>
 <script src="/assets/js/sweetalert2.min.js"></script>
 
 <?php if (!empty(session()->get('welcome_login'))): ?>
