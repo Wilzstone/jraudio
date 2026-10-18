@@ -1,53 +1,21 @@
-<?php
-$footerWaText = rawurlencode('Hai, saya mau tanya seputar penyewaan sound system JR Audio.');
-$footerWhatsappUrl = 'https://wa.me/6282331745445?text=' . $footerWaText;
-$footerTiktokUrl = 'https://www.tiktok.com/@jr_audio_production?_r=1&_t=ZS-96jk2bTEbDD';
-$footerInstagramUrl = 'https://www.instagram.com/jr.audioo?igsh=MW9xMTE3aXV2ZjByOQ==';
-$footerMapsUrl = 'https://maps.app.goo.gl/3PbyNjtrfRkZsbPx5';
-$footerTiktokIntent = 'intent://www.tiktok.com/@jr_audio_production#Intent;scheme=https;package=com.zhiliaoapp.musically;S.browser_fallback_url=' . rawurlencode($footerTiktokUrl) . ';end';
-$footerInstagramIntent = 'intent://instagram.com/_u/jr.audioo#Intent;scheme=https;package=com.instagram.android;S.browser_fallback_url=' . rawurlencode($footerInstagramUrl) . ';end';
-?>
-<footer>
-    <div class="footer-brand">
-        <img src="/assets/img/logo-jraudio.png" alt="JR Audio" class="footer-logo">
-    </div>
-    <p>&copy; <?= date('Y'); ?> JR Audio. Sistem Penyewaan Sound System.</p>
-    <div class="footer-links">
-        <a href="<?= htmlspecialchars($footerWhatsappUrl); ?>" target="_blank" rel="noopener">082331745445</a>
-        <span>|</span>
-        <a href="<?= htmlspecialchars($footerTiktokUrl); ?>" data-app-link data-android-intent="<?= htmlspecialchars($footerTiktokIntent); ?>" data-ios-link="<?= htmlspecialchars($footerTiktokUrl); ?>" target="_blank" rel="noopener">TikTok</a>
-        <span>|</span>
-        <a href="<?= htmlspecialchars($footerInstagramUrl); ?>" data-app-link data-android-intent="<?= htmlspecialchars($footerInstagramIntent); ?>" data-ios-link="instagram://user?username=jr.audioo" target="_blank" rel="noopener">Instagram</a>
-        <span>|</span>
-        <a href="<?= htmlspecialchars($footerMapsUrl); ?>" target="_blank" rel="noopener">Lokasi</a>
-    </div>
+@php
+$waFooter = 'https://wa.me/6282331745445?text='.rawurlencode('Halo JR Audio, saya ingin konsultasi kebutuhan sound system untuk acara.');
+@endphp
+<section class="prefooter" aria-labelledby="cta-heading">
+  <div class="container prefooter-layout">
+    <div><span class="eyebrow eyebrow-light">SIAP RENCANAKAN ACARAMU?</span><h2 id="cta-heading">Biar urusan audio,<br><em>kami bantu pikirkan.</em></h2><p>Ceritakan kebutuhan acaramu, lalu konsultasikan pilihan perlengkapannya dengan tim JR Audio.</p></div>
+    <div class="prefooter-actions"><a class="button button-white" href="{{ route('rekomendasi.index') }}">✦ &nbsp; Coba Smart Recommendation <span aria-hidden="true">↗</span></a><a class="text-link-light" href="{{ $waFooter }}" target="_blank" rel="noopener noreferrer">Atau chat langsung via WhatsApp →</a></div>
+  </div>
+</section>
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div class="footer-about"><div class="footer-logo-frame"><img src="{{ asset('assets/img/logo-jraudio.png') }}" alt="JR Audio" width="200" height="55"></div><p>Perlengkapan sound system untuk berbagai kebutuhan acara. Lihat katalog, rencanakan kebutuhan, dan konsultasikan detailnya bersama kami.</p></div>
+    <div><h3>Jelajahi</h3><a href="{{ url('/') }}">Beranda</a><a href="{{ url('/barang') }}">Katalog Barang</a><a href="{{ url('/paket') }}">Paket Audio</a><a href="{{ route('rekomendasi.index') }}">Smart Recommendation</a></div>
+    <div><h3>JR Audio</h3><a href="{{ url('/tentang') }}">Tentang Kami</a><a href="{{ url('/galeri') }}">Galeri Acara</a><a href="{{ url('/partner') }}">Partner</a><a href="{{ url('/lokasi') }}">Lokasi</a></div>
+    <div><h3>Hubungi Kami</h3><a href="{{ $waFooter }}" target="_blank" rel="noopener noreferrer">WhatsApp: 0823 3174 5445 ↗</a><a href="https://www.instagram.com/jr.audioo" target="_blank" rel="noopener noreferrer">Instagram @jr.audioo ↗</a><a href="https://www.tiktok.com/@jr_audio_production" target="_blank" rel="noopener noreferrer">TikTok JR Audio ↗</a><a href="{{ url('/kontak') }}">Kontak lengkap →</a></div>
+  </div>
+  <div class="container footer-bottom"><span>© {{ date('Y') }} JR Audio. All rights reserved.</span><span>Dirancang untuk kebutuhan penyewaan audio & event.</span><a href="{{ url('/login') }}">Login Admin</a></div>
 </footer>
-
-<script src="/assets/js/sweetalert2.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('[data-app-link]').forEach(function (link) {
-        link.addEventListener('click', function (event) {
-            var userAgent = navigator.userAgent || navigator.vendor || window.opera;
-            var isAndroid = /android/i.test(userAgent);
-            var isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
-
-            if (isAndroid && link.dataset.androidIntent) {
-                link.setAttribute('href', link.dataset.androidIntent);
-                return;
-            }
-
-            if (isIOS && link.dataset.iosLink && link.dataset.iosLink.indexOf('instagram://') === 0) {
-                event.preventDefault();
-                var fallbackUrl = link.getAttribute('href');
-                window.location.href = link.dataset.iosLink;
-                setTimeout(function () {
-                    window.location.href = fallbackUrl;
-                }, 1200);
-            }
-        });
-    });
-});
-</script>
+<script src="{{ asset('assets/js/public-ui.js') }}?v=2.0" defer></script>
 </body>
 </html>
