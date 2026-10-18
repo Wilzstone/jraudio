@@ -1,38 +1,5 @@
 @include('public.header')
-
-<section class="page-header page-header-gradient">
-    <span class="eyebrow">Tentang JR Audio</span>
-    <h1>Tentang Kami</h1>
-    <p>JR Audio siap membantu kebutuhan audio untuk berbagai acara.</p>
-</section>
-
-<section class="section text-section">
-    <div class="info-box about-box">
-        <img src="/assets/img/logo-jraudio.png" alt="JR Audio" class="about-logo">
-        <p>
-            JR Audio adalah layanan penyewaan sound system yang menyediakan perlengkapan audio untuk acara,
-            event, seminar, hajatan, gathering, dan berbagai kegiatan lainnya. Kami membantu pelanggan memilih
-            kebutuhan audio yang sesuai agar acara dapat berjalan lebih lancar.
-        </p>
-        <p>
-            Melalui website ini, pelanggan dapat melihat daftar barang yang tersedia, mengecek informasi lokasi,
-            serta langsung menghubungi JR Audio melalui WhatsApp, TikTok, atau Instagram untuk bertanya dan melakukan pemesanan.
-        </p>
-    </div>
-</section>
-
-
-<section class="section section-soft">
-    <div class="section-title">
-        <span class="eyebrow">Dokumentasi Singkat</span>
-        <h2>JR Audio dalam Berbagai Acara</h2>
-        <p>Foto-foto berikut bisa diganti dengan dokumentasi asli saat JR Audio menangani acara.</p>
-    </div>
-    <div class="gallery-preview">
-        <img src="/assets/img/galeri/event1.jpeg" alt="Galeri JR Audio 1">
-        <img src="/assets/img/galeri/event2.jpeg" alt="Galeri JR Audio 2">
-        <img src="/assets/img/galeri/event3.jpeg" alt="Galeri JR Audio 3">
-    </div>
-</section>
-
-@include('public.footer')
+<main id="main-content"><section class="page-hero"><div class="container"><span class="eyebrow eyebrow-light">ABOUT JR AUDIO</span><h1>Tentang kami.<br><em>Tentang pengalaman suara.</em></h1><p>Kenali layanan JR Audio dan cara kami membantu kebutuhan audio berbagai acara.</p></div></section>
+<section class="section"><div class="container about-layout"><div><span class="eyebrow">WHO WE ARE</span><h2>Partner kebutuhan audio <span>untuk acaramu.</span></h2><p>JR Audio menyediakan penyewaan perlengkapan sound system untuk kegiatan seperti seminar, hajatan, gathering, pertunjukan, dan acara komunitas.</p><p>Melalui katalog, halaman paket, dan fitur Smart Recommendation, pelanggan dapat mulai memahami pilihan perlengkapan serta memperkirakan biayanya sebelum berkonsultasi lebih lanjut.</p><a class="button button-dark" href="{{ url('/kontak') }}">Kenali Cara Menghubungi Kami ↗</a></div><div class="about-image-stack"><img src="{{ asset('assets/img/galeri/event1.jpeg') }}" alt="Perangkat sound system JR Audio di acara" loading="lazy"><div class="about-image-tag"><strong>JR AUDIO</strong><small>SOUND SYSTEM & EVENT EQUIPMENT</small></div></div></div></section>
+<section class="section section-ivory"><div class="container"><div class="section-heading"><div><span class="eyebrow">HOW WE HELP</span><h2>Sederhana dari awal, <span>jelas sampai akhir.</span></h2></div></div><div class="feature-three"><div><span>01 /</span><h3>Jelajahi kebutuhan</h3><p>Lihat pilihan perangkat dan paket dari katalog JR Audio.</p></div><div><span>02 /</span><h3>Susun rekomendasi</h3><p>Gunakan Smart Recommendation untuk memperoleh saran awal alat dan anggaran.</p></div><div><span>03 /</span><h3>Diskusi dengan tim</h3><p>Konfirmasi jadwal, jumlah peralatan, lokasi, serta kebutuhan teknis lainnya.</p></div></div></div></section>
+</main>@include('public.footer')

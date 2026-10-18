@@ -1,37 +1,6 @@
 @include('public.header')
-<?php
-$noTelp = '082331745445';
-$waText = rawurlencode('Hai, saya mau tanya seputar penyewaan sound system JR Audio.');
-$whatsappUrl = 'https://wa.me/6282331745445?text=' . $waText;
-$tiktokUrl = 'https://www.tiktok.com/@jr_audio_production?_r=1&_t=ZS-96jk2bTEbDD';
-$instagramUrl = 'https://www.instagram.com/jr.audioo?igsh=MW9xMTE3aXV2ZjByOQ==';
-$mapsUrl = 'https://maps.app.goo.gl/3PbyNjtrfRkZsbPx5';
-$tiktokIntent = 'intent://www.tiktok.com/@jr_audio_production#Intent;scheme=https;package=com.zhiliaoapp.musically;S.browser_fallback_url=' . rawurlencode($tiktokUrl) . ';end';
-$instagramIntent = 'intent://instagram.com/_u/jr.audioo#Intent;scheme=https;package=com.instagram.android;S.browser_fallback_url=' . rawurlencode($instagramUrl) . ';end';
-?>
-
-<section class="page-header page-header-gradient">
-    <span class="eyebrow">Kontak</span>
-    <h1>Kontak</h1>
-    <p>Hubungi JR Audio untuk pemesanan sound system dan informasi ketersediaan barang.</p>
-</section>
-
-<section class="section text-section">
-    <h2>Hubungi JR Audio</h2>
-    <p>Untuk pemesanan atau pertanyaan, pelanggan dapat menghubungi kontak berikut.</p>
-
-    <div class="info-box contact-list">
-        <p><strong>No. Telepon / WhatsApp:</strong> <a href="<?= htmlspecialchars($whatsappUrl); ?>" target="_blank" rel="noopener"><?= $noTelp; ?></a></p>
-        <p><strong>TikTok:</strong> <a href="<?= htmlspecialchars($tiktokUrl); ?>" data-app-link data-android-intent="<?= htmlspecialchars($tiktokIntent); ?>" data-ios-link="<?= htmlspecialchars($tiktokUrl); ?>" target="_blank" rel="noopener">@jr_audio_production</a></p>
-        <p><strong>Instagram:</strong> <a href="<?= htmlspecialchars($instagramUrl); ?>" data-app-link data-android-intent="<?= htmlspecialchars($instagramIntent); ?>" data-ios-link="instagram://user?username=jr.audioo" target="_blank" rel="noopener">@jr_audioo</a></p>
-        <p><strong>Lokasi:</strong> <a href="<?= htmlspecialchars($mapsUrl); ?>" target="_blank" rel="noopener">Lihat di Google Maps</a></p>
-    </div>
-
-    <div class="contact-actions">
-        <a class="btn-primary" href="<?= htmlspecialchars($whatsappUrl); ?>" target="_blank" rel="noopener">Chat via WhatsApp</a>
-        <a class="btn-secondary" href="<?= htmlspecialchars($tiktokUrl); ?>" data-app-link data-android-intent="<?= htmlspecialchars($tiktokIntent); ?>" data-ios-link="<?= htmlspecialchars($tiktokUrl); ?>" target="_blank" rel="noopener">Buka TikTok</a>
-        <a class="btn-secondary" href="<?= htmlspecialchars($instagramUrl); ?>" data-app-link data-android-intent="<?= htmlspecialchars($instagramIntent); ?>" data-ios-link="instagram://user?username=jr.audioo" target="_blank" rel="noopener">Buka Instagram</a>
-    </div>
-</section>
-
-@include('public.footer')
+@php $waKontak='https://wa.me/6282331745445?text='.rawurlencode('Halo JR Audio, saya ingin konsultasi mengenai penyewaan sound system.'); @endphp
+<main id="main-content"><section class="page-hero"><div class="container"><span class="eyebrow eyebrow-light">LET'S TALK</span><h1>Acara dimulai<br><em>dari percakapan.</em></h1><p>Punya pertanyaan soal perlengkapan, lokasi, atau estimasi biaya? Hubungi JR Audio.</p></div></section>
+<section class="section section-ivory"><div class="container contact-grid"><a href="{{ $waKontak }}" class="contact-tile" target="_blank" rel="noopener noreferrer"><span class="contact-icon">↗</span><span>CHAT LANGSUNG</span><h2>WhatsApp</h2><p>0823 3174 5445</p><b>Mulai percakapan →</b></a><a class="contact-tile" href="https://www.instagram.com/jr.audioo" target="_blank" rel="noopener noreferrer"><span class="contact-icon">↗</span><span>FOLLOW US</span><h2>Instagram</h2><p>@jr.audioo</p><b>Lihat profil →</b></a><a class="contact-tile" href="https://www.tiktok.com/@jr_audio_production" target="_blank" rel="noopener noreferrer"><span class="contact-icon">↗</span><span>WATCH MORE</span><h2>TikTok</h2><p>@jr_audio_production</p><b>Lihat video →</b></a></div></section>
+<section class="section"><div class="container contact-banner"><div><span class="eyebrow">VISIT OUR LOCATION</span><h2>Cari lokasi JR Audio?</h2><p>Buka petunjuk arah dan konsultasikan kebutuhan sebelum datang.</p></div><a class="button button-dark" href="https://maps.app.goo.gl/3PbyNjtrfRkZsbPx5" target="_blank" rel="noopener noreferrer">Buka Google Maps ↗</a></div></section>
+</main>@include('public.footer')
