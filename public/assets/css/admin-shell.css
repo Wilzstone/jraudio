@@ -72,3 +72,22 @@ body.ja-admin-page {margin:0;background:#f5f6f9;color:#191c26}
   .ja-admin-page .ja-admin-content {padding:0!important;overflow:visible!important}
   body.ja-admin-page {background:#fff!important}
 }
+
+/* v3 accessibility/readability pass across Owner & Karyawan screens. */
+body.ja-admin-page{font-size:15.5px;line-height:1.55}
+.ja-nav-link{font-size:14.5px;padding:10px 12px;gap:11px}
+.ja-logo{width:74px;height:74px;margin-bottom:25px}
+.ja-brand-mark{width:63px;height:63px}
+.ja-topbar{height:70px;padding:0 26px}
+.ja-breadcrumb{font-size:12px;letter-spacing:.55px}
+.ja-user-details strong,.ja-user-dropdown-heading strong{font-size:14px}
+.ja-user-details small,.ja-user-dropdown-heading small{font-size:12px}
+.ja-user-dropdown a,.ja-signout{font-size:14px}
+.ja-admin-page .ja-admin-content{padding:22px 26px 32px;max-width:1620px}
+.ja-admin-page .ja-admin-content .form-label{font-size:14px;font-weight:650}
+.ja-admin-page .ja-admin-content .form-control,.ja-admin-page .ja-admin-content .form-select{font-size:15px;min-height:41px}
+.ja-admin-page .ja-admin-content .table:not(.ja-inventory-table){font-size:14.5px}
+.ja-admin-page .ja-admin-content .table:not(.ja-inventory-table) th{font-size:13.5px}
+.ja-admin-page .ja-admin-content .btn{font-size:14px}
+@media(max-width:900px){.ja-topbar{padding:0 20px}.ja-admin-page .ja-admin-content{padding:19px 17px 27px}}
+@media(max-width:630px){.ja-topbar{height:65px;padding:0 13px}.ja-user-details strong{font-size:13px}.ja-breadcrumb{font-size:10.5px;letter-spacing:.1px}.ja-admin-page .ja-admin-content{padding:16px 12px 26px}}

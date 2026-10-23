@@ -8,7 +8,10 @@
     <link rel="icon" href="{{ asset('assets/img/jr-favicon.svg') }}" type="image/svg+xml">
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/admin-custom.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/admin-shell.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/admin-shell.css') }}?v=3.0">
+    @if (request()->is('admin/barang') || request()->is('cek-ketersediaan'))
+        <link rel="stylesheet" href="{{ asset('assets/css/admin-inventory.css') }}?v=3.0">
+    @endif
     <link rel="stylesheet" href="{{ asset('assets/css/sweetalert2.min.css') }}">
 </head>
 <body class="ja-admin-page">

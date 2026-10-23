@@ -1,14 +1,18 @@
 @php
     $topRole = auth()->user()?->role ?? session('role', 'Karyawan');
     $topName = session('nama') ?: session('username') ?: auth()->user()?->username ?: $topRole;
-    $topPage = $pageTitle ?? (
-        str_contains(request()->path(), 'pengembalian') ? 'Pengembalian' :
-        (str_contains(request()->path(), 'transaksi') ? 'Transaksi' :
-        (str_contains(request()->path(), 'barang') ? 'Barang' :
-        (str_contains(request()->path(), 'pelanggan') ? 'Pelanggan' :
-        (str_contains(request()->path(), 'karyawan') ? 'Karyawan' :
-        (str_contains(request()->path(), 'pembayaran') ? 'Pembayaran' :
-        (str_contains(request()->path(), 'laporan') ? 'Laporan' : 'Dashboard')))))));
+    // Judul konsisten untuk kedua URL ketersediaan barang.
+    $topPath = request()->path();
+    $topPage = $pageTitle ?? match (true) {
+        str_contains($topPath, 'cek-ketersediaan'), str_contains($topPath, 'barang') => 'Barang',
+        str_contains($topPath, 'pengembalian') => 'Pengembalian',
+        str_contains($topPath, 'transaksi') => 'Transaksi',
+        str_contains($topPath, 'pelanggan') => 'Pelanggan',
+        str_contains($topPath, 'karyawan') => 'Karyawan',
+        str_contains($topPath, 'pembayaran') => 'Pembayaran',
+        str_contains($topPath, 'laporan') => 'Laporan',
+        default => 'Dashboard',
+    };
 @endphp
 <header class="ja-topbar">
     <div class="ja-topbar-left">

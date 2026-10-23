@@ -7,8 +7,8 @@
     <meta name="description" content="JR Audio menyediakan penyewaan sound system, paket audio, dan Smart Recommendation untuk kebutuhan berbagai acara.">
     <title>@yield('title', 'JR Audio | Sound System untuk Setiap Acara')</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('assets/img/jr-favicon.svg') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/public.css') }}?v=2.0">
-    <link rel="stylesheet" href="{{ asset('assets/css/smart.css') }}?v=2.0">
+    <link rel="stylesheet" href="{{ asset('assets/css/public.css') }}?v=3.0">
+    <link rel="stylesheet" href="{{ asset('assets/css/smart.css') }}?v=3.0">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Lewati navigasi</a>
