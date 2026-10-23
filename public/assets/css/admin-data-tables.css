@@ -1,0 +1,84 @@
+/* JR Audio v4 — reusable management tables (Karyawan, Pelanggan, Transaksi).
+   Works alongside admin-inventory.css and does not modify inventory/transaction behavior. */
+.ja-management {color:#242a35}
+.ja-management .ja-inventory-heading p{max-width:680px}
+.ja-management .ja-inventory-controls{gap:9px}
+.ja-management .ja-control-search{min-width:235px}
+.ja-management .ja-control-select select{font-size:14px;max-width:205px}
+.ja-management .ja-toolbar-intro h2{font-size:20px}
+.ja-management .ja-toolbar-intro p{font-size:14px}
+.ja-management .ja-inventory-meta p{font-size:14px}
+.ja-management .ja-stat-label{font-size:13px}
+.ja-management .ja-stat-card small{font-size:12.5px}
+.ja-stats-three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.ja-stats-five{grid-template-columns:repeat(5,minmax(0,1fr))}
+.ja-stat-canceled:before{background:#9aa0ad!important}
+.ja-list-table-wrap{width:100%;overflow-x:auto;overscroll-behavior-x:contain}
+.ja-list-table{border-collapse:separate;border-spacing:0;width:100%;text-align:left;font-size:14.5px;line-height:1.48}
+.ja-list-table.ja-list-staff{min-width:980px}
+.ja-list-table.ja-list-customers{min-width:650px}
+.ja-list-table.ja-list-transactions{min-width:985px}
+.ja-list-table thead th{background:#f5f6f9;color:#616e80;font-size:12.5px;font-weight:800;white-space:nowrap;letter-spacing:.01em;padding:13px 15px;border-bottom:1px solid #e9ecf2}
+.ja-list-table tbody td{padding:14px 15px;border-bottom:1px solid #edf0f4;color:#414a59;vertical-align:middle}
+.ja-list-table tbody tr:last-child td{border-bottom:0}
+.ja-list-table tbody tr:hover{background:#fafbfd}
+.ja-list-table tr[hidden]{display:none!important}
+.ja-list-primary{min-width:190px}
+.ja-list-identity{display:flex;align-items:center;gap:11px;min-width:0}
+.ja-list-avatar{height:42px;width:42px;flex:none;display:grid;place-items:center;border-radius:12px;background:#f9e8eb;color:#b82d3a;font-weight:850;font-size:18px}
+.ja-list-avatar.is-customer{background:#edf1fa;color:#435d92}
+.ja-list-name{display:flex;flex-direction:column;gap:3px;min-width:0}
+.ja-list-name strong{font-size:15px;line-height:1.32;font-weight:800;color:#252c39;overflow-wrap:anywhere}
+.ja-list-name small{font-size:12.5px;color:#8b94a0;font-weight:500}
+.ja-list-username{font-weight:700;color:#495466;white-space:nowrap}
+.ja-list-regular{color:#4e5967;overflow-wrap:anywhere}
+.ja-list-ellipsis{display:-webkit-box;overflow:hidden;-webkit-line-clamp:2;-webkit-box-orient:vertical;max-width:260px;overflow-wrap:anywhere}
+.ja-list-address{display:block;max-width:600px;overflow-wrap:anywhere}
+.ja-list-badge{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;font-size:12.5px;font-weight:800;white-space:nowrap;color:#4a586a;background:#f2f4f8}
+.ja-list-badge i{display:inline-block;width:7px;height:7px;flex:none;border-radius:50%;background:currentColor}
+.ja-list-badge.is-owner{color:#b62a36;background:#ffedef}
+.ja-list-badge.is-staff{color:#3661a4;background:#edf4ff}
+.ja-list-badge.is-booking{color:#956112;background:#fff3df}
+.ja-list-badge.is-active{color:#2966a2;background:#eaf4ff}
+.ja-list-badge.is-done{color:#0e8356;background:#e8f8ef}
+.ja-list-badge.is-canceled{color:#818895;background:#eff0f3}
+.ja-list-chip{display:inline-flex;padding:6px 9px;border-radius:8px;background:#f3f4f7;color:#616b78;font-weight:700;font-size:13px;white-space:nowrap}
+.ja-list-dates{display:flex;flex-direction:column;gap:3px;white-space:nowrap}
+.ja-list-dates strong{font-size:14px;color:#2b3542}
+.ja-list-dates small{font-size:12px;color:#8994a4}
+.ja-list-money{font-size:14.5px;color:#252d3b;font-weight:800;white-space:nowrap}
+.ja-list-separator{color:#aab1bc}
+.ja-list-actions-cell{min-width:135px}
+.ja-list-right{text-align:right}
+.ja-list-table .ja-action-group{gap:7px;justify-content:flex-end;white-space:nowrap}
+.ja-list-table .ja-action-edit,.ja-list-table .ja-action-delete{min-height:37px;font-size:13px;padding:8px 11px}
+.ja-list-detail{gap:8px}
+.ja-management .ja-inventory-empty[hidden]{display:none!important}
+@media(max-width:1350px){.ja-stats-five{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:920px){.ja-stats-five{grid-template-columns:repeat(2,minmax(0,1fr))}.ja-management .ja-inventory-controls{width:100%}}
+@media(max-width:720px){
+ .ja-stats-three{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .ja-management .ja-inventory-heading h1{font-size:27px}
+ .ja-management .ja-inventory-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .ja-management .ja-control-search{grid-column:1/-1;min-width:0}
+ .ja-management .ja-control-select select{width:100%;max-width:unset;font-size:13.5px}
+ .ja-list-table-wrap{overflow:visible}
+ .ja-list-table,.ja-list-table.ja-list-staff,.ja-list-table.ja-list-customers,.ja-list-table.ja-list-transactions{display:block;min-width:0;padding:0 12px 13px}
+ .ja-list-table thead{display:none}
+ .ja-list-table tbody{display:block}
+ .ja-list-table tbody tr.ja-list-row{display:block;margin-top:11px;padding:12px 14px;border:1px solid #e9edf2;border-radius:13px;background:#fff;box-shadow:0 3px 10px rgba(20,24,36,.045)}
+ .ja-list-table tbody tr.ja-list-row[hidden]{display:none!important}
+ .ja-list-table tbody tr.ja-list-row td{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;border-bottom:1px solid #f0f1f5;padding:10px 0;min-width:0;text-align:right;font-size:14px;overflow-wrap:anywhere}
+ .ja-list-table tbody tr.ja-list-row td:before{content:attr(data-label);display:block;flex:0 0 37%;min-width:0;text-align:left;font-size:12.5px;font-weight:750;color:#7c8695}
+ .ja-list-table tbody tr.ja-list-row td.ja-list-primary{display:block;padding:2px 0 14px;margin-bottom:1px;text-align:left}
+ .ja-list-table tbody tr.ja-list-row td.ja-list-primary:before{display:none}
+ .ja-list-name strong{font-size:16px}
+ .ja-list-table tbody tr.ja-list-row td.ja-list-actions-cell{display:block;border:0;padding:14px 0 0;text-align:left}
+ .ja-list-table tbody tr.ja-list-row td.ja-list-actions-cell:before{display:none}
+ .ja-list-table .ja-action-group{justify-content:flex-start;gap:9px}
+ .ja-list-table .ja-action-edit,.ja-list-table .ja-action-delete{min-height:41px;padding:9px 15px;font-size:14px}
+ .ja-list-ellipsis,.ja-list-address{max-width:57%;text-align:right}
+ .ja-list-dates{align-items:flex-end}
+}
+@media(max-width:430px){.ja-management .ja-inventory-controls{grid-template-columns:1fr}.ja-management .ja-control-search{grid-column:1}.ja-stats-three,.ja-stats-five{grid-template-columns:repeat(2,minmax(0,1fr))}.ja-list-table .ja-action-group{flex-wrap:wrap}}
+@media(prefers-reduced-motion:reduce){.ja-list-table *{scroll-behavior:auto}}

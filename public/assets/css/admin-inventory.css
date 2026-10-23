@@ -75,3 +75,11 @@
 @media(max-width:390px){.ja-inventory-controls{grid-template-columns:1fr}.ja-control-search{grid-column:auto}.ja-inventory-table tbody tr.ja-item-row{gap:0 8px;padding:11px}}
 @media(prefers-reduced-motion:reduce){.ja-action-edit,.ja-action-delete,.ja-inventory-add{transition:none}}
 @media print{.ja-inventory-toolbar .ja-inventory-controls,.ja-inventory-add,.ja-item-actions,.ja-inventory-footnote{display:none!important}}
+
+/* v4 readability alignment across all JR Audio management tables. */
+.ja-inventory-table{font-size:15px}
+.ja-inventory-table thead th{font-size:12.5px}
+.ja-inventory-table .ja-product-text strong{font-size:15px}
+.ja-inventory .ja-control-search input{font-size:14.5px}
+.ja-inventory .ja-action-edit,.ja-inventory .ja-action-delete{font-size:13.5px;min-height:37px}
+@media(max-width:720px){.ja-inventory-table tbody td{font-size:14px}}
