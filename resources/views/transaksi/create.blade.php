@@ -85,8 +85,10 @@ foreach ($barang as $b) {
             <div class="border rounded p-3 mt-3 bg-light"><strong>Estimasi Total:</strong> <span id="preview_total">Rp
                     0</span><br><small>Paketan: harga paket manual + genset + item luar. Satuan: barang + genset + item
                     luar.</small></div>
-            <button class="btn btn-primary mt-3">{{ $pengajuan ? 'Konfirmasi & Simpan Transaksi' : 'Simpan Transaksi' }}</button>
-            @if($pengajuan)<a href="{{ route('pengajuan.admin.show',['kode'=>$pengajuan->kode]) }}" class="btn btn-outline-secondary mt-3">Kembali ke Pengajuan</a>@endif
+            <div class="jr-form-actions">
+              <button type="submit" class="btn btn-primary">{{ $pengajuan ? 'Konfirmasi & Simpan Transaksi' : 'Simpan Transaksi' }}</button>
+              <a href="{{ $pengajuan ? route('pengajuan.admin.show',['kode'=>$pengajuan->kode]) : url('/admin/transaksi') }}" class="btn btn-outline-secondary">{{ $pengajuan ? 'Kembali ke Pengajuan' : 'Kembali' }}</a>
+            </div>
         </form>
     </div>
 </div>
@@ -119,22 +121,22 @@ foreach ($barang as $b) {
     const isPengajuan = @json((bool)$pengajuan);
     const prefillItems = @json($prefillItems);
     function rupiah(v) { return 'Rp ' + Number(v || 0).toLocaleString('id-ID') }
-    function tambahBarisBarang(id = '', qty = 1) { const c = document.getElementById('template-barang').content.cloneNode(true); const r = c.querySelector('.barang-row'); r.querySelector('.tipe-item').value = 'Barang'; r.querySelector('.barang-select').value = id; r.querySelector('.qty-input').value = qty; document.getElementById('barang-wrapper').appendChild(c); refreshRows() }
-    function tambahBarisExternal(nama = '', sumber = '', qty = 1, harga = 0) { const c = document.getElementById('template-barang').content.cloneNode(true); const r = c.querySelector('.barang-row'); r.querySelector('.tipe-item').value = 'External'; r.querySelector('input[name="nama_item_external[]"]').value = nama; r.querySelector('input[name="sumber_external[]"]').value = sumber; r.querySelector('.qty-input').value = qty; r.querySelector('.harga-manual-item').value = harga; document.getElementById('barang-wrapper').appendChild(c); refreshRows() }
+    function tambahBarisBarang(id = '', qty = 1) { const c = document.getElementById('template-barang').content.cloneNode(true); const r = c.querySelector('.barang-row'); r.querySelector('.tipe-item').value = 'Barang'; r.querySelector('.barang-select').value = id; r.querySelector('.qty-input').value = qty; document.getElementById('barang-wrapper').appendChild(c); refreshRows(); window.JRMoney?.refresh() }
+    function tambahBarisExternal(nama = '', sumber = '', qty = 1, harga = 0) { const c = document.getElementById('template-barang').content.cloneNode(true); const r = c.querySelector('.barang-row'); r.querySelector('.tipe-item').value = 'External'; r.querySelector('input[name="nama_item_external[]"]').value = nama; r.querySelector('input[name="sumber_external[]"]').value = sumber; r.querySelector('.qty-input').value = qty; r.querySelector('.harga-manual-item').value = harga; document.getElementById('barang-wrapper').appendChild(c); refreshRows(); window.JRMoney?.refresh() }
     function hapusBaris(b) { if (document.querySelectorAll('.barang-row').length > 1) b.closest('.barang-row').remove(); hitungPreview() }
     function toggleRowType(s) { const r = s.closest('.barang-row'), ex = s.value === 'External'; r.querySelectorAll('.barang-field').forEach(e => e.style.display = ex ? 'none' : ''); r.querySelectorAll('.external-field').forEach(e => e.style.display = ex ? '' : 'none'); r.querySelector('input[name="nama_item_external[]"]').required = ex; if (ex) r.querySelector('.barang-select').value = ''; hitungPreview() }
     function refreshRows() { document.querySelectorAll('.tipe-item').forEach(toggleRowType); hitungPreview() }
     function clearRows() { document.getElementById('barang-wrapper').innerHTML = '' }
     function loadPaketBarang() { const j = document.getElementById('jenis_transaksi').value, id = document.getElementById('id_paket').value; if (j !== 'Paketan' || !id || !paketDetail[id]) return; clearRows(); paketDetail[id].forEach(i => tambahBarisBarang(i.id_barang, i.qty)); cekGensetOtomatis(); if (!document.querySelector('.barang-row')) tambahBarisBarang(); refreshRows() }
-    function cekGensetOtomatis() { if (isPengajuan) return; const biaya = Number(document.getElementById('biaya_genset').value || 0); if (biaya <= 0 || !idGenset) return; let ada = false; document.querySelectorAll('.barang-row').forEach(r => { if (r.querySelector('.tipe-item').value === 'Barang' && r.querySelector('.barang-select').value === idGenset) ada = true }); if (!ada) tambahBarisBarang(idGenset, 1) }
+    function cekGensetOtomatis() { if (isPengajuan) return; const biaya = window.JRMoney.parse(document.getElementById('biaya_genset').value); if (biaya <= 0 || !idGenset) return; let ada = false; document.querySelectorAll('.barang-row').forEach(r => { if (r.querySelector('.tipe-item').value === 'Barang' && r.querySelector('.barang-select').value === idGenset) ada = true }); if (!ada) tambahBarisBarang(idGenset, 1) }
     function toggleJenisTransaksi() { const j = document.getElementById('jenis_transaksi').value; document.querySelectorAll('.paket-field').forEach(e => e.style.display = j === 'Paketan' ? '' : 'none'); document.getElementById('harga_paket_manual').required = j === 'Paketan'; document.getElementById('id_paket').required = j === 'Paketan' && !isPengajuan; hitungPreview() }
     function hitungPreview() {
         const j = document.getElementById('jenis_transaksi').value;
-        const genset = Number(document.getElementById('biaya_genset').value || 0);
+        const genset = window.JRMoney.parse(document.getElementById('biaya_genset').value);
         let total = genset;
 
         if (j === 'Paketan') {
-            total += Number(document.getElementById('harga_paket_manual').value || 0);
+            total += window.JRMoney.parse(document.getElementById('harga_paket_manual').value);
         }
 
         document.querySelectorAll('.barang-row').forEach(r => {
@@ -142,7 +144,7 @@ foreach ($barang as $b) {
             const qty = Number(r.querySelector('.qty-input').value || 0);
 
             if (ex) {
-                total += qty * Number(r.querySelector('.harga-manual-item').value || 0);
+                total += qty * window.JRMoney.parse(r.querySelector('.harga-manual-item').value);
             } else if (j === 'Satuan') {
                 const s = r.querySelector('.barang-select');
                 const harga = Number(s.options[s.selectedIndex]?.dataset.harga || 0);
