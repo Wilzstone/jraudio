@@ -155,7 +155,7 @@
                                 <td class="ja-item-actions" data-label="Aksi">
                                     <div class="ja-action-group">
                                         <a href="{{ url('/admin/barang/edit') }}?id={{ $id }}" class="ja-action-edit" aria-label="Edit {{ $name }}">Edit</a>
-                                        <form action="{{ url('/admin/barang/hapus') }}" method="post" onsubmit="return confirm('Hapus barang ini? Data yang sudah dipakai transaksi tidak dapat dihapus.')">
+                                        <form action="{{ url('/admin/barang/hapus') }}" method="post" data-jr-confirm="Hapus barang ini? Data yang sudah dipakai transaksi tidak dapat dihapus.">
                                             @csrf
                                             <input type="hidden" name="id" value="{{ $id }}">
                                             <button class="ja-action-delete" type="submit" aria-label="Hapus {{ $name }}">Hapus</button>

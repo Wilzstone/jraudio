@@ -4,6 +4,13 @@
     <a class="btn btn-outline-secondary" href="{{ route('pengajuan.admin.index') }}">← Semua Pengajuan</a></div>
   <div class="jr-pengajuan-panel">
     <h2>Detail Acara</h2>
+    @if($pelangganTertaut)
+      <p class="jr-form-help">Pelanggan tersimpan: <strong>{{ $pelangganTertaut->nama_pelanggan }}</strong> (ID #{{ $pelangganTertaut->id_pelanggan }}). Nomor WhatsApp digunakan untuk mencocokkan data yang sudah ada.</p>
+      @if(strcasecmp(trim($pelangganTertaut->nama_pelanggan),trim($pengajuan->nama_pelanggan)) !== 0)
+        <div class="alert alert-warning">Nama pada pengajuan berbeda dari nama pelanggan yang tersimpan untuk nomor ini. Verifikasi identitas pelanggan sebelum transaksi disetujui.</div>
+      @endif
+    @endif
+
     <div class="jr-pengajuan-info">
       <div><small>Jenis acara</small><strong>{{ ucwords(str_replace('_',' ',$pengajuan->jenis_acara)) }}</strong></div>
       <div><small>Tanggal yang diminta</small><strong>{{ $pengajuan->tanggal_acara }}</strong></div>
@@ -22,7 +29,7 @@
     @if($pengajuan->id_transaksi)
       <div class="alert alert-success">Pengajuan ini sudah menjadi Transaksi <strong>#{{ $pengajuan->id_transaksi }}</strong>. <a href="{{ url('/admin/transaksi/detail') }}?id={{ $pengajuan->id_transaksi }}">Lihat Transaksi</a>.</div>
     @else
-      <div class="alert alert-info">Sebelum menyetujui, pastikan tanggal, stok, jumlah perlengkapan, harga final dan sumber vendor. Persetujuan akan membuat transaksi Booking dan mengalokasikan stok internal.</div>
+      <div class="alert alert-info">Sebelum menyetujui, pastikan tanggal, stok, jumlah perlengkapan, harga final dan sumber vendor. Jika daftar perlengkapan berubah di halaman ini, tekan Simpan Revisi dahulu. Setelah itu buka Form Transaksi untuk konfirmasi akhir. Stok baru dialokasikan saat form transaksi resmi disimpan.</div>
     @endif
   </div>
   @if(in_array($pengajuan->status, ['Menunggu','Revisi']))
@@ -78,12 +85,12 @@
     </div>
     <div class="jr-pengajuan-actions">
       <button class="btn btn-outline-secondary" name="aksi" value="revisi" type="submit">Simpan Revisi</button>
-      <button class="btn btn-success" name="aksi" value="setujui" type="submit" onclick="return confirm('Sudah cek stok, tanggal dan harga final? Pengajuan ini akan langsung menjadi transaksi Booking.')">Setujui &amp; Buat Transaksi</button>
+      <a class="btn btn-success" href="{{ url('/admin/transaksi/tambah') }}?pengajuan={{ urlencode($pengajuan->kode) }}">Setujui → Isi Form Transaksi</a>
     </div>
   </form>
-  <form method="POST" action="{{ route('pengajuan.admin.batal',['kode'=>$pengajuan->kode]) }}" class="jr-pengajuan-panel">@csrf
+  <form method="POST" action="{{ route('pengajuan.admin.batal',['kode'=>$pengajuan->kode]) }}" class="jr-pengajuan-panel" data-jr-confirm="Batalkan pengajuan ini? Stok tidak berubah.">@csrf
     <label class="form-label">Alasan pembatalan (opsional)</label><textarea class="form-control" name="catatan_admin" rows="2" maxlength="2000"></textarea>
-    <button class="btn btn-outline-danger mt-3" onclick="return confirm('Batalkan pengajuan ini? Tidak ada perubahan stok.')">Batalkan Pengajuan</button>
+    <button class="btn btn-outline-danger mt-3" >Batalkan Pengajuan</button>
   </form>
   @endif
 </section>

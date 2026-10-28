@@ -66,7 +66,7 @@
                             <td data-label="Alamat"><span class="ja-list-ellipsis" title="{{ $address }}">{{ $address !== '' ? $address : '—' }}</span></td>
                             <td data-label="Aksi" class="ja-list-actions-cell"><div class="ja-action-group">
                                 <a class="ja-action-edit" href="{{ url('/admin/karyawan/edit') }}?id={{ $id }}" aria-label="Edit karyawan {{ $name }}">Edit</a>
-                                <form action="{{ url('/admin/karyawan/hapus') }}" method="post" onsubmit="return confirm('Yakin hapus karyawan ini? Akun yang sudah digunakan pada transaksi tidak dapat dihapus.')">
+                                <form action="{{ url('/admin/karyawan/hapus') }}" method="post" data-jr-confirm="Yakin hapus karyawan ini? Akun yang sudah digunakan pada transaksi tidak dapat dihapus.">
                                     @csrf<input type="hidden" name="id" value="{{ $id }}"><button type="submit" class="ja-action-delete" aria-label="Hapus karyawan {{ $name }}">Hapus</button>
                                 </form>
                             </div></td>

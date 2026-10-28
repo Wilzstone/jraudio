@@ -4,6 +4,7 @@ namespace App\Services;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
+use App\Services\PelangganNomorService;
 use RuntimeException;
 
 class PengajuanService
@@ -21,6 +22,23 @@ class PengajuanService
             if ($p->status === 'Batal') throw new RuntimeException('Pengajuan telah dibatalkan.');
             $rows = DB::table('pengajuan_detail')->where('id_pengajuan', $p->id_pengajuan)->orderBy('id_pengajuan_detail')->get();
             $edited = [];
+            if (array_key_exists('form_items', $data)) {
+                foreach ($data['form_items'] as $item) {
+                    $jenis = ($item['tipe_item'] ?? '') === 'External' ? 'External' : 'Barang';
+                    $idBarang = $jenis === 'Barang' ? (int)($item['id_barang'] ?? 0) : null;
+                    if ($jenis === 'Barang' && $idBarang < 1) throw new RuntimeException('Barang katalog wajib dipilih.');
+                    $edited[] = [
+                        'id_pengajuan_detail' => null, 'tipe_item' => $jenis, 'id_barang' => $idBarang,
+                        'nama_barang' => trim((string)($item['nama_barang'] ?? '')),
+                        'sumber_external' => $jenis === 'External' ? trim((string)($item['sumber_external'] ?? '')) : null,
+                        'qty' => (int)($item['qty'] ?? 0),
+                        'harga_satuan' => $jenis === 'External' ? max(0,(int)($item['harga_satuan'] ?? 0)) : 0,
+                    ];
+                }
+                if (!$edited) throw new RuntimeException('Tambahkan paling sedikit satu perlengkapan.');
+                // Form transaksi menjadi sumber rincian final. Hanya dalam transaksi DB yang sama.
+                DB::table('pengajuan_detail')->where('id_pengajuan', $p->id_pengajuan)->delete();
+            } else {
             foreach ($rows as $row) {
                 $edit = $data['items'][$row->id_pengajuan_detail] ?? null;
                 if (!$edit) throw new RuntimeException('Ada detail barang yang tidak lengkap.');
@@ -47,6 +65,7 @@ class PengajuanService
                     'sumber_external' => $jenis === 'External' ? trim((string)($new['sumber_external'] ?? '')) : null,
                     'qty' => (int)$new['qty'],
                 ];
+            }
             }
             if (!$edited) throw new RuntimeException('Daftar peralatan kosong. Tambahkan perlengkapan sebelum menyetujui.');
             $statusBaru = $setujui ? 'Disetujui' : 'Revisi';
@@ -82,15 +101,17 @@ class PengajuanService
             $karyawan = DB::table('karyawan')->where('id_user', $idUser)->first();
             if (!$karyawan) throw new RuntimeException('Akun ini belum terhubung dengan data karyawan.');
             $hargaFinal = (int)$data['harga_final'];
+            $biayaBarangLuar = 0;
+            foreach ($edited as $r) if ($r['tipe_item'] === 'External') $biayaBarangLuar += (int)($r['harga_satuan'] ?? 0) * $r['qty'];
             $biayaGenset = (int)($data['biaya_genset'] ?? 0);
-            if ($hargaFinal <= 0 || $biayaGenset > $hargaFinal) throw new RuntimeException('Harga final harus positif dan mencakup biaya genset.');
+            if ($hargaFinal <= 0 || $biayaGenset + $biayaBarangLuar >= $hargaFinal) throw new RuntimeException('Harga final harus positif dan mencakup biaya genset.');
             // Urutkan dan kunci semua barang sebelum memeriksa total qty, termasuk ID berulang.
             $totalPerBarang = [];
             foreach ($edited as $r) {
                 if ($r['tipe_item'] === 'Barang') {
                     $totalPerBarang[$r['id_barang']] = ($totalPerBarang[$r['id_barang']] ?? 0) + $r['qty'];
                 } else {
-                    if (!$r['nama_barang'] || !$r['sumber_external']) {
+                    if (!$r['nama_barang'] || !$r['sumber_external'] || in_array(mb_strtolower(trim($r['sumber_external'])), ['konfirmasi crew', 'perlu ditentukan'], true)) {
                         throw new RuntimeException('Nama barang dan sumber mitra wajib diisi untuk item External.');
                     }
                 }
@@ -105,11 +126,8 @@ class PengajuanService
                 }
                 $stockRows[$idBarang] = $b;
             }
-            $pelanggan = DB::table('pelanggan')->where('no_hp', $p->no_hp)->where('nama_pelanggan', $p->nama_pelanggan)->orderBy('id_pelanggan')->first();
-            $idPelanggan = $pelanggan ? (int)$pelanggan->id_pelanggan : DB::table('pelanggan')->insertGetId([
-                'nama_pelanggan' => $p->nama_pelanggan, 'no_hp' => $p->no_hp,
-                'alamat' => null, // Lokasi acara bukan alamat pelanggan.
-            ]);
+            $idPelanggan = $p->id_pelanggan ? (int)$p->id_pelanggan : PelangganNomorService::cariAtauBuat($p->nama_pelanggan, $p->no_hp);
+            if (isset($data['id_pelanggan']) && (int)$data['id_pelanggan'] !== $idPelanggan) throw new RuntimeException('Pelanggan tidak sesuai dengan pengajuan.');
             $namaPaket = match ($p->rekomendasi_paket) {
                 'paket2500' => 'Paket 2500', 'paket5000' => 'Paket 5000', default => 'Custom',
             };
@@ -118,10 +136,12 @@ class PengajuanService
                 'id_pelanggan' => $idPelanggan, 'id_karyawan' => $karyawan->id_karyawan,
                 'jenis_transaksi' => 'Paketan', 'id_paket' => $paket->id_paket ?? null,
                 'nama_paket' => $namaPaket,
-                'harga_paket_manual' => $hargaFinal - $biayaGenset, 'biaya_genset' => $biayaGenset,
+                'harga_paket_manual' => $hargaFinal - $biayaGenset - $biayaBarangLuar, 'biaya_genset' => $biayaGenset,
                 'tanggal_transaksi' => now()->toDateString(),
                 'tanggal_sewa' => $tanggalSewa->toDateString(), 'tanggal_kembali' => $tanggalKembali->toDateString(),
                 'status_transaksi' => 'Booking', 'total_harga' => $hargaFinal,
+                'alamat_lokasi_acara' => $data['alamat_lokasi_acara'] ?? null,
+                'link_google_maps' => $data['link_google_maps'] ?? null,
             ]);
             foreach ($edited as $r) {
                 $external = $r['tipe_item'] === 'External';
@@ -130,7 +150,8 @@ class PengajuanService
                     'id_barang' => $external ? null : $r['id_barang'],
                     'nama_item_external' => $external ? $r['nama_barang'] : null,
                     'sumber_external' => $external ? $r['sumber_external'] : null,
-                    'qty' => $r['qty'], 'harga_satuan' => 0, 'subtotal' => 0,
+                    'qty' => $r['qty'], 'harga_satuan' => $r['harga_satuan'] ?? 0,
+                    'subtotal' => ($r['harga_satuan'] ?? 0) * $r['qty'],
                     'tipe_item' => $r['tipe_item'],
                 ]);
             }
@@ -149,6 +170,25 @@ class PengajuanService
             ]);
             return (int)$idTransaksi;
         }, 3);
+    }
+
+    /** Konfirmasi dari halaman Tambah Transaksi, bukan dari tombol pengajuan langsung. */
+    public function konfirmasiFormTransaksi(string $kode, array $data, int $idUser): int
+    {
+        $jenis = $data['jenis_transaksi'] ?? 'Paketan';
+        if ($jenis !== 'Paketan') throw new RuntimeException('Pengajuan rekomendasi harus disimpan sebagai transaksi Paketan/Custom.');
+        $items = $data['form_items'] ?? [];
+        $biayaLuar = 0;
+        foreach ($items as $item) {
+            if (($item['tipe_item'] ?? '') === 'External') {
+                $biayaLuar += (int)$item['qty'] * (int)($item['harga_satuan'] ?? 0);
+            }
+        }
+        $data['harga_final'] = (int)($data['harga_paket_manual'] ?? 0) + (int)($data['biaya_genset'] ?? 0) + $biayaLuar;
+        if ($data['harga_final'] <= 0) throw new RuntimeException('Isi harga paket final terlebih dahulu.');
+        $id = $this->simpanDanProses($kode, $data, $idUser, true);
+        if (!$id) throw new RuntimeException('Transaksi gagal disimpan.');
+        return $id;
     }
 
     public function batalkan(string $kode, int $idUser, ?string $catatan): void

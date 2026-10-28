@@ -93,7 +93,7 @@
     </div>
 </div>
 
-<div class="card">
+<div class="card jr-form-card">
     <div class="card-header bg-dark text-white">Riwayat Pengembalian</div>
     <div class="card-body table-responsive">
         <table class="table table-bordered table-striped align-middle">

@@ -38,10 +38,10 @@
 </div>
 
 <div class="row mb-4">
-    <div class="col-md-3 mb-2"><div class="card"><div class="card-body"><small>Total Transaksi</small><h4><?= (int) $ringkasan['total_transaksi'] ?></h4></div></div></div>
-    <div class="col-md-3 mb-2"><div class="card"><div class="card-body"><small>Total Nilai Transaksi</small><h4>Rp <?= number_format((int) $ringkasan['total_nilai_transaksi'], 0, ',', '.') ?></h4></div></div></div>
-    <div class="col-md-3 mb-2"><div class="card"><div class="card-body"><small>Pendapatan Terkonfirmasi</small><h4>Rp <?= number_format((int) $ringkasan['total_pendapatan'], 0, ',', '.') ?></h4></div></div></div>
-    <div class="col-md-3 mb-2"><div class="card"><div class="card-body"><small>Transaksi Berjalan</small><h4><?= (int) $ringkasan['total_berjalan'] ?></h4></div></div></div>
+    <div class="col-md-3 mb-2"><div class="card jr-form-card"><div class="card-body"><small>Total Transaksi</small><h4><?= (int) $ringkasan['total_transaksi'] ?></h4></div></div></div>
+    <div class="col-md-3 mb-2"><div class="card jr-form-card"><div class="card-body"><small>Total Nilai Transaksi</small><h4>Rp <?= number_format((int) $ringkasan['total_nilai_transaksi'], 0, ',', '.') ?></h4></div></div></div>
+    <div class="col-md-3 mb-2"><div class="card jr-form-card"><div class="card-body"><small>Pendapatan Terkonfirmasi</small><h4>Rp <?= number_format((int) $ringkasan['total_pendapatan'], 0, ',', '.') ?></h4></div></div></div>
+    <div class="col-md-3 mb-2"><div class="card jr-form-card"><div class="card-body"><small>Transaksi Berjalan</small><h4><?= (int) $ringkasan['total_berjalan'] ?></h4></div></div></div>
 </div>
 
 <div class="card mb-4">

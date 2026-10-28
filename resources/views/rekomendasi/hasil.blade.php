@@ -105,12 +105,15 @@
       <aside class="result-aside">
         <div class="estimate-card">
           <span>PERKIRAAN HARGA</span>
-          @if($hasil['harga_paket'])
-            <h3>Rp {{ number_format($hasil['harga_paket']['minimum'], 0, ',', '.') }} – Rp {{ number_format($hasil['harga_paket']['maksimum'], 0, ',', '.') }}</h3>
-            <p>Perkiraan biaya {{ $hasil['paket_hint'] }}. Harga akhir menyesuaikan kebutuhan dan kesepakatan dengan JR Audio.</p>
+          @if($hasil['harga_total'])
+            <h3>Rp {{ number_format($hasil['harga_total']['minimum'], 0, ',', '.') }} – Rp {{ number_format($hasil['harga_total']['maksimum'], 0, ',', '.') }}</h3>
+            <p>Perkiraan biaya {{ $hasil['paket_hint'] }}{{ !empty($hasil['biaya_genset']) ? ' termasuk tambahan genset Rp400.000' : '' }}. Harga akhir disesuaikan bersama JR Audio.</p>
           @else
             <h3 class="estimate-contact">Hubungi JR Audio</h3>
-            <p>Untuk kebutuhan acara ini, harga akan diberikan setelah konsultasi.</p>
+            <p>Untuk kebutuhan acara ini, harga paket akan diberikan setelah konsultasi.</p>
+            @if(!empty($hasil['biaya_genset']))
+              <p><strong>Tambahan genset awal: Rp {{ number_format((int)$hasil['biaya_genset'],0,',','.') }}</strong>, di luar harga paket custom.</p>
+            @endif
           @endif
           <div class="estimate-sep"></div>
           <div class="estimate-line">
@@ -127,7 +130,7 @@
             };
           @endphp
           <span class="estimate-status {{ $hasil['status_anggaran'] === 'cukup_untuk_rentang' ? 'status-ok' : 'status-warn' }}">{{ $pesanAnggaran }}</span>
-          <p class="estimate-disclaimer">Harga belum termasuk transportasi, genset, dan kebutuhan tambahan. Ketersediaan peralatan akan dikonfirmasi sebelum pemesanan.</p>
+          <p class="estimate-disclaimer">Harga belum termasuk transportasi dan kebutuhan tambahan lainnya.{{ empty($hasil['biaya_genset']) ? ' Biaya genset jika diperlukan dikonfirmasi crew.' : ' Genset sudah dimasukkan sebagai biaya awal yang dapat direvisi crew.' }} Ketersediaan peralatan akan dikonfirmasi sebelum pemesanan.</p>
 
           <div class="jr-order-cta" id="ajukan-sewa">
             <h3 style="font-size:1.18rem;margin:0 0 8px">Konsultasikan acaramu</h3>

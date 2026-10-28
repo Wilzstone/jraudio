@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use App\Services\PelangganNomorService;
 use Illuminate\Validation\ValidationException;
 
 class PengajuanPublikController extends Controller
@@ -33,19 +34,20 @@ class PengajuanPublikController extends Controller
             $kode = 'JR-'.date('ymd').'-'.Str::upper(Str::random(12));
             try {
                 DB::transaction(function () use ($data, $input, $hasil, $kode, $hash) {
-                    $nomor = preg_replace('/\D+/', '', $data['no_hp']);
-                    if (str_starts_with($nomor, '0')) $nomor = '62'.substr($nomor, 1);
+                    $nomor = PelangganNomorService::normalisasi($data['no_hp']);
+                    $idPelanggan = PelangganNomorService::cariAtauBuat($data['nama_pelanggan'], $nomor);
                     $pengajuanId = DB::table('pengajuan_sewa')->insertGetId([
-                        'kode' => $kode, 'token_hash' => $hash,
+                        'kode' => $kode, 'token_hash' => $hash, 'id_pelanggan' => $idPelanggan,
                         'nama_pelanggan' => trim($data['nama_pelanggan']),
                         'no_hp' => $nomor,
                         'jenis_acara' => $input['jenis_acara'],
                         'lokasi_acara' => $input['lokasi_acara'] ?? null,
                         'tanggal_acara' => $input['tanggal_acara'],
                         'rekomendasi_paket' => $hasil['pilihan_paket'],
-                        'estimasi_min' => $hasil['harga_paket']['minimum'] ?? null,
-                        'estimasi_max' => $hasil['harga_paket']['maksimum'] ?? null,
+                        'estimasi_min' => $hasil['harga_total']['minimum'] ?? null,
+                        'estimasi_max' => $hasil['harga_total']['maksimum'] ?? null,
                         'kebutuhan_json' => json_encode($input, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR),
+                        'biaya_genset' => (int)($hasil['biaya_genset'] ?? 0),
                         'status' => 'Menunggu', 'created_at' => now(), 'updated_at' => now(),
                     ]);
                     foreach ($hasil['barang'] ?? [] as $item) {
@@ -58,6 +60,7 @@ class PengajuanPublikController extends Controller
                             'qty' => (int)$item['jumlah'],
                             'jumlah_vendor' => (int)($item['jumlah_vendor'] ?? 0),
                             'tipe_item' => $item['id_barang'] ? 'Barang' : 'External',
+                            'sumber_external' => $item['sumber_external'] ?? null,
                             'created_at' => now(), 'updated_at' => now(),
                         ]);
                     }
@@ -97,7 +100,8 @@ class PengajuanPublikController extends Controller
         ];
         foreach ($detail as $row) $ringkasan[] = '- '.$row->nama_barang.' : '.$row->qty.' unit';
         $ringkasan[] = '*Rundown:* '.mb_substr(trim((string)($input['rundown'] ?? '')) ?: 'Belum diisi',0,500);
-        $ringkasan[] = '*Estimasi paket:* '.($pengajuan->estimasi_min !== null ? 'Rp '.number_format((int)$pengajuan->estimasi_min,0,',','.').' - Rp '.number_format((int)$pengajuan->estimasi_max,0,',','.') : 'Dikonfirmasi crew');
+        $ringkasan[] = '*Tambahan genset:* Rp '.number_format((int)$pengajuan->biaya_genset,0,',','.');
+        $ringkasan[] = '*Estimasi termasuk genset:* '.($pengajuan->estimasi_min !== null ? 'Rp '.number_format((int)$pengajuan->estimasi_min,0,',','.').' - Rp '.number_format((int)$pengajuan->estimasi_max,0,',','.') : 'Dikonfirmasi crew');
         $ringkasan[] = 'Mohon bantu cek ketersediaan, kebutuhan alat, dan harga final. Terima kasih.';
         $nomor = preg_replace('/\D+/', '', (string)config('jraudio.whatsapp_number'));
         $wa = preg_match('/^[1-9][0-9]{7,14}$/', $nomor)
