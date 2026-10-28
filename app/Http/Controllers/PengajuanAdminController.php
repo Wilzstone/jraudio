@@ -26,7 +26,29 @@ class PengajuanAdminController extends Controller
         $barang = DB::table('barang')->orderBy('nama_barang')->get();
         $kebutuhan = json_decode($pengajuan->kebutuhan_json, true) ?: [];
         $pelangganTertaut = $pengajuan->id_pelanggan ? DB::table('pelanggan')->where('id_pelanggan',$pengajuan->id_pelanggan)->first() : null;
-        return view('admin.pengajuan.show', compact('pengajuan', 'detail', 'barang', 'kebutuhan', 'pelangganTertaut'));
+        $pilihanCrew = $pengajuan->pilihan_crew ?: ($pengajuan->rekomendasi_paket === 'custom' ? 'satuan' : $pengajuan->rekomendasi_paket);
+        $presetPaket = [];
+        foreach (DB::table('paket')->whereIn('nama_paket', ['Paket 2500', 'Paket 5000'])->where('status', 'Aktif')->get() as $paket) {
+            $kodePaket = $paket->nama_paket === 'Paket 2500' ? 'paket2500' : 'paket5000';
+            $presetPaket[$kodePaket] = DB::table('paket_detail as pd')
+                ->join('barang as b', 'b.id_barang', '=', 'pd.id_barang')
+                ->where('pd.id_paket', $paket->id_paket)
+                ->orderBy('pd.id_paket_detail')
+                ->get(['pd.id_barang','b.nama_barang','pd.qty'])
+                ->map(fn ($r) => [
+                    'tipe_item' => 'Barang', 'id_barang' => (int)$r->id_barang,
+                    'nama_barang' => $r->nama_barang, 'qty' => (int)$r->qty,
+                    'sumber_external' => '',
+                ])->all();
+        }
+        $initialItems = $detail->map(fn ($r) => [
+            'tipe_item' => $r->tipe_item, 'id_barang' => $r->id_barang,
+            'nama_barang' => $r->nama_barang, 'qty' => (int)$r->qty,
+            'sumber_external' => $r->sumber_external ?? '',
+        ])->all();
+        $inventoryOptions = $barang->map(fn ($b) => ['id_barang' => $b->id_barang, 'nama_barang' => $b->nama_barang, 'stok' => $b->stok])->values()->all();
+        $formItemsClient = old('form_items', $initialItems);
+        return view('admin.pengajuan.show', compact('pengajuan', 'detail', 'barang', 'kebutuhan', 'pelangganTertaut', 'pilihanCrew', 'presetPaket', 'initialItems', 'inventoryOptions', 'formItemsClient'));
     }
 
     public function simpan(Request $request, string $kode, PengajuanService $service)
@@ -38,18 +60,13 @@ class PengajuanAdminController extends Controller
             'harga_final' => 'nullable|integer|min:1|max:1000000000',
             'biaya_genset' => 'nullable|integer|min:0|max:1000000000',
             'catatan_admin' => 'nullable|string|max:2000',
-            'items' => 'nullable|array',
-            'items_baru' => 'nullable|array|max:30',
-            'items_baru.*.tipe_item' => 'required|in:Barang,External',
-            'items_baru.*.id_barang' => 'nullable|integer|exists:barang,id_barang',
-            'items_baru.*.nama_barang' => 'required|string|max:150',
-            'items_baru.*.sumber_external' => 'nullable|string|max:150',
-            'items_baru.*.qty' => 'required|integer|min:1|max:10000',
-            'items.*.tipe_item' => 'required|in:Barang,External',
-            'items.*.id_barang' => 'nullable|integer|exists:barang,id_barang',
-            'items.*.nama_barang' => 'required|string|max:150',
-            'items.*.sumber_external' => 'nullable|string|max:150',
-            'items.*.qty' => 'required|integer|min:1|max:10000',
+            'pilihan_crew' => 'required|in:paket2500,paket5000,satuan',
+            'form_items' => 'required|array|min:1|max:60',
+            'form_items.*.tipe_item' => 'required|in:Barang,External',
+            'form_items.*.id_barang' => 'nullable|integer|exists:barang,id_barang',
+            'form_items.*.nama_barang' => 'required|string|max:150',
+            'form_items.*.sumber_external' => 'nullable|string|max:150',
+            'form_items.*.qty' => 'required|integer|min:1|max:10000',
         ]);
         try {
             $id = $service->simpanDanProses($kode, $data, (int)$request->user()->id_user, false);

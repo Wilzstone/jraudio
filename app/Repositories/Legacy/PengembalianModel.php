@@ -17,7 +17,7 @@ class PengembalianModel
     }
     public function getTransaksiBerjalan(): array
     {
-        $stmt = $this->db->query("SELECT t.*, p.nama_pelanggan, k.nama_karyawan
+        $stmt = $this->db->query("SELECT t.*, p.nama_pelanggan, k.nama_karyawan, (SELECT COALESCE(SUM(pb.jumlah_bayar),0) FROM pembayaran pb WHERE pb.id_transaksi=t.id_transaksi AND pb.status_konfirmasi='Dikonfirmasi' AND pb.jenis_pembayaran IN ('DP','Pelunasan')) AS sudah_bayar_sewa
             FROM transaksi t
             JOIN pelanggan p ON t.id_pelanggan = p.id_pelanggan
             JOIN karyawan k ON t.id_karyawan = k.id_karyawan
@@ -80,13 +80,6 @@ class PengembalianModel
             $rusakList = $data['rusak_qty'] ?? [];
             $dendaManual = max(0, (int) ($data['denda_manual'] ?? 0));
 
-            $cek = $this->db->prepare("SELECT COUNT(*) AS total FROM pengembalian WHERE id_transaksi = ?");
-            $cek->execute([$idTransaksi]);
-            $row = $cek->fetch();
-            if ((int) $row['total'] > 0) {
-                throw new Exception('Transaksi ini sudah pernah diproses pengembaliannya.');
-            }
-
             $stmtTrx = $this->db->prepare("SELECT * FROM transaksi WHERE id_transaksi = ? FOR UPDATE");
             $stmtTrx->execute([$idTransaksi]);
             $trx = $stmtTrx->fetch();
@@ -95,10 +88,21 @@ class PengembalianModel
                 throw new Exception('Transaksi tidak ditemukan.');
             }
 
-            if ($trx['status_transaksi'] === 'Selesai') {
-                throw new Exception('Transaksi sudah selesai dan tidak bisa diproses ulang.');
+            if ($trx['status_transaksi'] !== 'Berjalan') {
+                throw new Exception('Pengembalian hanya boleh untuk transaksi Berjalan. Booking tidak dapat langsung Selesai.');
             }
-
+            if ($tanggalPengembalian !== \Carbon\Carbon::today('Asia/Jakarta')->toDateString() || $tanggalPengembalian < $trx['tanggal_sewa']) {
+                throw new Exception('Pengembalian hanya dapat dicatat pada hari ini dan setelah tanggal mulai sewa.');
+            }
+            $cek = $this->db->prepare("SELECT COUNT(*) FROM pengembalian WHERE id_transaksi = ?");
+            $cek->execute([$idTransaksi]);
+            if ((int)$cek->fetchColumn() > 0) throw new Exception('Pengembalian sudah diproses. Tidak boleh diproses dua kali.');
+            $cekBayar = $this->db->prepare("SELECT COALESCE(SUM(jumlah_bayar),0) FROM pembayaran WHERE id_transaksi=? AND status_konfirmasi='Dikonfirmasi' AND jenis_pembayaran IN ('DP','Pelunasan')");
+            $cekBayar->execute([$idTransaksi]);
+            if ((int)$cekBayar->fetchColumn() < (int)$trx['total_harga']) {
+                throw new Exception('Biaya sewa belum lunas atau pembayaran belum dikonfirmasi. Lunasi sewa sebelum pengembalian.');
+            }
+            // Status Selesai baru boleh ditulis setelah stok dan detail pengembalian berhasil.
             $dendaTelat = $this->hitungDenda($trx['tanggal_kembali'], $tanggalPengembalian);
 
             $stmt = $this->db->prepare("INSERT INTO pengembalian

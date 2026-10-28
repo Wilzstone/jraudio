@@ -1,51 +1,73 @@
 <?php
 namespace App\Http\Controllers;
+
 use App\Repositories\Legacy\{PembayaranModel,TransaksiModel};
+use App\Services\PembayaranWorkflowService;
 use Illuminate\Http\Request;
+use Throwable;
+
 class PembayaranController extends Controller
 {
-    public function index(PembayaranModel $model) {$pembayaran=$model->getAll();return view('pembayaran.index',compact('pembayaran'));}
-    public function create(Request $request,PembayaranModel $model) {
-        $idTransaksi=$request->integer('id_transaksi');$tm=new TransaksiModel;
-        $transaksi=$idTransaksi>0?$tm->getById($idTransaksi):null;$daftarTransaksi=$tm->getAll();
-        if($idTransaksi>0&&!$transaksi) return redirect('/admin/pembayaran')->with('info','Transaksi tidak ditemukan');
-        $totalBayar=$idTransaksi>0?$model->getTotalDikonfirmasi($idTransaksi):0;
-        $totalDenda=$idTransaksi>0?$tm->getDenda($idTransaksi):0;
-        $totalTagihan=$transaksi?(int)$transaksi['total_harga']+$totalDenda:0;
-        $sisaBayar=max(0,$totalTagihan-$totalBayar);
-        if ($transaksi&&$transaksi['status_transaksi']==='Selesai'&&$sisaBayar<=0)
-            return redirect('/admin/transaksi/detail?id='.$idTransaksi)->with('info','Transaksi telah lunas');
-        return view('pembayaran.create',compact('idTransaksi','transaksi','daftarTransaksi','totalBayar','totalDenda','totalTagihan','sisaBayar'));
+    public function index(PembayaranModel $model)
+    {
+        $pembayaran = $model->getAll();
+        return view('pembayaran.index', compact('pembayaran'));
     }
-    public function store(Request $request,PembayaranModel $model) {
-        $data=$request->validate([
+
+    public function create(Request $request, PembayaranWorkflowService $workflow)
+    {
+        $idTransaksi = $request->integer('id_transaksi');
+        $tm = new TransaksiModel;
+        $daftarTransaksi = $tm->getAll();
+        $transaksi = $idTransaksi > 0 ? $tm->getById($idTransaksi) : null;
+        if ($idTransaksi > 0 && !$transaksi) return redirect('/admin/pembayaran')->with('info','Transaksi tidak ditemukan');
+        $ringkasan = $transaksi ? $workflow->ringkasan($idTransaksi) : null;
+        $jenisOtomatis = $transaksi && $transaksi['status_transaksi'] === 'Selesai' ? 'Denda' : 'DP';
+        $sisaBayar = $ringkasan ? ($jenisOtomatis === 'Denda' ? $ringkasan['sisa_denda'] : $ringkasan['sisa_sewa']) : 0;
+        $sudahLunas = $transaksi && $sisaBayar <= 0;
+        $pending = $transaksi && \Illuminate\Support\Facades\DB::table('pembayaran')->where('id_transaksi', $idTransaksi)->where('status_konfirmasi','Menunggu')->exists();
+        return view('pembayaran.create', compact('idTransaksi','transaksi','daftarTransaksi','ringkasan','jenisOtomatis','sisaBayar','sudahLunas','pending'));
+    }
+
+    public function store(Request $request, PembayaranWorkflowService $workflow)
+    {
+        $data = $request->validate([
             'id_transaksi'=>'required|integer|exists:transaksi,id_transaksi',
-            'tanggal_bayar'=>'required|date','jenis_pembayaran'=>'required|in:DP,Pelunasan',
-            'jumlah_bayar'=>'required|integer|min:1','status_konfirmasi'=>'required|in:Menunggu,Dikonfirmasi,Ditolak'
+            'tanggal_bayar'=>['required','date',\Illuminate\Validation\Rule::in([\Carbon\Carbon::today('Asia/Jakarta')->toDateString()])],
+            'jenis_pembayaran'=>'required|in:DP,Pelunasan,Denda',
+            'jumlah_bayar'=>'nullable|integer|min:1',
+            'status_konfirmasi'=>'required|in:Menunggu,Dikonfirmasi',
         ]);
-        $id=(int)$data['id_transaksi'];$tm=new TransaksiModel;$trx=$tm->getById($id);
-        $sisa=max(0,(int)$trx['total_harga']+$tm->getDenda($id)-$model->getTotalDikonfirmasi($id));
-        if($sisa<=0) return back()->with('info','Transaksi sudah lunas');
-        if($data['jenis_pembayaran']==='Pelunasan')$data['jumlah_bayar']=$sisa;
-        if($data['status_konfirmasi']==='Dikonfirmasi'&&$data['jumlah_bayar']>$sisa)
-            return back()->with('info','Jumlah bayar melebihi sisa tagihan');
-        $model->create($data);return redirect('/admin/transaksi/detail?id='.$id)->with('info','Pembayaran disimpan');
-    }
-    public function status(Request $request,PembayaranModel $model) {
-        $data=$request->validate(['id_pembayaran'=>'required|integer|exists:pembayaran,id_pembayaran','status_konfirmasi'=>'required|in:Menunggu,Dikonfirmasi,Ditolak']);
-        $row=$model->getById((int)$data['id_pembayaran']);
-        if($data['status_konfirmasi']==='Dikonfirmasi' && $row['status_konfirmasi']!=='Dikonfirmasi') {
-            $tm=new TransaksiModel;
-            $trx=$tm->getById((int)$row['id_transaksi']);
-            $sisa=max(0,(int)$trx['total_harga']+$tm->getDenda((int)$row['id_transaksi'])-$model->getTotalDikonfirmasi((int)$row['id_transaksi']));
-            if((int)$row['jumlah_bayar']>$sisa) return back()->with('info','Pembayaran melebihi sisa tagihan, tidak dapat dikonfirmasi.');
+        if ($request->user()?->role !== 'Owner' && $data['status_konfirmasi'] !== 'Menunggu') {
+            return back()->withInput()->with('info','Konfirmasi pembayaran hanya dapat dilakukan Owner.');
         }
-        $model->updateStatus((int)$data['id_pembayaran'],$data['status_konfirmasi']);
-        return redirect('/admin/transaksi/detail?id='.$row['id_transaksi'])->with('info','Status pembayaran diubah');
+        try {
+            $workflow->tambah($data);
+            return redirect('/admin/transaksi/detail?id='.$data['id_transaksi'])->with('info','Pembayaran berhasil dicatat.');
+        } catch (Throwable $e) {
+            return back()->withInput()->with('info','Pembayaran gagal: '.$e->getMessage());
+        }
     }
-    public function delete(Request $request,PembayaranModel $model) {
-        $id=$request->integer('id');$row=$model->getById($id);
-        if($row) $model->delete($id);
-        return redirect('/admin/transaksi/detail?id='.($row['id_transaksi']??0))->with('info','Pembayaran dihapus');
+
+    public function status(Request $request, PembayaranWorkflowService $workflow)
+    {
+        $data = $request->validate(['id_pembayaran'=>'required|integer|exists:pembayaran,id_pembayaran', 'status_konfirmasi'=>'required|in:Menunggu,Dikonfirmasi,Ditolak']);
+        try {
+            $id = $workflow->ubahStatus((int)$data['id_pembayaran'], $data['status_konfirmasi']);
+            return redirect('/admin/transaksi/detail?id='.$id)->with('info','Status pembayaran diperbarui.');
+        } catch (Throwable $e) {
+            return back()->with('info',$e->getMessage());
+        }
+    }
+
+    public function delete(Request $request, PembayaranWorkflowService $workflow)
+    {
+        $data = $request->validate(['id'=>'required|integer|exists:pembayaran,id_pembayaran']);
+        try {
+            $id = $workflow->hapus((int)$data['id']);
+            return redirect('/admin/transaksi/detail?id='.$id)->with('info','Pembayaran belum terkonfirmasi dihapus.');
+        } catch (Throwable $e) {
+            return back()->with('info',$e->getMessage());
+        }
     }
 }

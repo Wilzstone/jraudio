@@ -1,6 +1,6 @@
 @include('layouts.header')
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <div><div class="jr-form-eyebrow">PENYEWAAN / JR AUDIO</div><h3>{{ $pengajuan ? 'Konfirmasi & Buat Transaksi' : 'Tambah Transaksi Penyewaan' }}</h3><p class="jr-form-help">{{ $pengajuan ? 'Data dari pengajuan '. $pengajuan->kode .' sudah diisi. Periksa kembali sebelum disimpan.' : 'Lengkapi data penyewaan dan periksa rincian biaya.' }}</p></div><a href="/admin/transaksi" class="btn btn-secondary">Kembali</a>
+    <div><div class="jr-form-eyebrow">PENYEWAAN / JR AUDIO</div><h3>{{ $pengajuan ? 'Konfirmasi & Buat Transaksi' : 'Tambah Transaksi Penyewaan' }}</h3><p class="jr-form-help">{{ $pengajuan ? 'Data dari pengajuan '. $pengajuan->kode .' sudah diisi. Periksa kembali sebelum disimpan.' : 'Lengkapi data penyewaan dan periksa rincian biaya.' }}</p></div>
 </div>
 <?php
 $today = date('Y-m-d');
@@ -37,11 +37,7 @@ foreach ($barang as $b) {
                         name="tanggal_kembali" id="tanggal_kembali" class="form-control" min="<?= $today ?>"
                         value="<?= htmlspecialchars($old['tanggal_kembali'] ?? $today) ?>" required><small
                         class="text-muted">Maksimal H+7.</small></div>
-                <div class="col-md-2 mb-3"><label class="form-label">Status</label><select name="status_transaksi"
-                        class="form-select">
-                        <option value="Booking">Booking</option>
-                        <option value="Berjalan" @disabled($pengajuan)>Berjalan</option>
-                    </select></div>
+                <div class="col-md-2 mb-3"><label class="form-label">Status awal</label><input class="form-control" value="Booking" readonly><input type="hidden" name="status_transaksi" value="Booking"></div>
             </div>
             <div class="row g-3 mb-2">
                 <div class="col-md-7"><label class="form-label">Alamat lokasi acara <span class="text-muted">(diisi crew)</span></label>
@@ -163,16 +159,16 @@ foreach ($barang as $b) {
     function updateTanggalKembaliLimit() { const s = document.getElementById('tanggal_sewa'), k = document.getElementById('tanggal_kembali'); if (!s.value) return; const d = new Date(s.value), m = new Date(d); m.setDate(m.getDate() + 7); const ms = m.toISOString().slice(0, 10); k.min = s.value; k.max = ms; if (!k.value || k.value < s.value) k.value = s.value; if (k.value > ms) k.value = ms }
     document.addEventListener('input', e => { if (e.target.matches('.qty-input,#harga_paket_manual,#biaya_genset,.harga-manual-item')) { if (e.target.id === 'biaya_genset') cekGensetOtomatis(); hitungPreview() } }); document.addEventListener('change', e => { if (e.target.matches('.barang-select,.tipe-item')) hitungPreview() }); document.getElementById('jenis_transaksi').addEventListener('change', function () { toggleJenisTransaksi(); if (this.value === 'Paketan' && !isPengajuan) loadPaketBarang() }); document.getElementById('id_paket').addEventListener('change', () => { if(!isPengajuan) loadPaketBarang(); }); document.getElementById('tanggal_sewa').addEventListener('change', updateTanggalKembaliLimit); document.addEventListener('DOMContentLoaded', () => {
         if (isPengajuan) {
-            document.getElementById('jenis_transaksi').value = 'Paketan';
+            document.getElementById('jenis_transaksi').value = @json($oldJenis);
             prefillItems.forEach(i => {
                 if (i.tipe_item === 'Barang') tambahBarisBarang(String(i.id_barang || ''), i.qty);
                 else tambahBarisExternal(i.nama_item_external, i.sumber_external || '', i.qty, i.harga_satuan || 0);
             });
-            // Paket custom memakai id_paket kosong, tanpa membuat stok/barang baru.
+            // Jenis (Satuan/Paketan) mengikuti pilihan crew yang tersimpan di pengajuan.
             document.getElementById('jenis_transaksi').disabled = true;
             document.getElementById('id_paket').disabled = true;
             // Disabled selects tidak ikut POST; kirim jenis dari hidden.
-            const h=document.createElement('input'); h.type='hidden'; h.name='jenis_transaksi'; h.value='Paketan'; document.getElementById('formTransaksi').appendChild(h);
+            const h=document.createElement('input'); h.type='hidden'; h.name='jenis_transaksi'; h.value=@json($oldJenis); document.getElementById('formTransaksi').appendChild(h);
             const paketHidden=document.createElement('input'); paketHidden.type='hidden'; paketHidden.name='id_paket'; paketHidden.value=document.getElementById('id_paket').value; document.getElementById('formTransaksi').appendChild(paketHidden);
         } else tambahBarisBarang();
         toggleJenisTransaksi(); updateTanggalKembaliLimit(); refreshRows();

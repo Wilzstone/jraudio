@@ -17,7 +17,7 @@
           <td>{{ ucwords(str_replace('_',' ',$row->jenis_acara)) }}</td>
           <td>{{ date('d/m/Y',strtotime($row->tanggal_acara)) }}</td>
           <td>{{ match($row->rekomendasi_paket) {'paket2500'=>'Paket 2500','paket5000'=>'Paket 5000',default=>'Custom'} }}</td>
-          <td><span class="jr-status">{{ $row->status }}</span></td>
+          <td><span class="jr-status jr-status-{{ strtolower($row->status) }}">{{ $row->status }}</span></td>
           <td><a class="btn btn-sm btn-dark" href="{{ route('pengajuan.admin.show',['kode'=>$row->kode]) }}">Tinjau</a></td></tr>
         @empty
           <tr><td colspan="6" class="text-center py-5">Belum ada pengajuan dengan status ini.</td></tr>

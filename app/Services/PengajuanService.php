@@ -20,6 +20,21 @@ class PengajuanService
                 return $setujui && $p->id_transaksi ? (int)$p->id_transaksi : throw new RuntimeException('Pengajuan sudah disetujui.');
             }
             if ($p->status === 'Batal') throw new RuntimeException('Pengajuan telah dibatalkan.');
+            $pilihan = $p->pilihan_crew ?: ($p->rekomendasi_paket === 'custom' ? null : $p->rekomendasi_paket);
+            if (!$setujui) {
+                $pilihan = (string)($data['pilihan_crew'] ?? '');
+                if (!in_array($pilihan, ['paket2500','paket5000','satuan'], true)) {
+                    throw new RuntimeException('Pilih Paket 2500, Paket 5000, atau Satuan/Custom terlebih dahulu.');
+                }
+                if ($pilihan !== 'satuan') {
+                    $paketDipilih = $pilihan === 'paket2500' ? 'Paket 2500' : 'Paket 5000';
+                    if (!DB::table('paket')->where('nama_paket', $paketDipilih)->where('status','Aktif')->exists()) {
+                        throw new RuntimeException('Paket yang dipilih belum tersedia dalam katalog paket aktif.');
+                    }
+                }
+            } elseif (!$pilihan || !in_array($pilihan, ['paket2500','paket5000','satuan'], true)) {
+                throw new RuntimeException('Pilihan crew belum disimpan. Kembali ke Tinjau Pengajuan dan klik Simpan Revisi.');
+            }
             $rows = DB::table('pengajuan_detail')->where('id_pengajuan', $p->id_pengajuan)->orderBy('id_pengajuan_detail')->get();
             $edited = [];
             if (array_key_exists('form_items', $data)) {
@@ -88,7 +103,10 @@ class PengajuanService
             }
             if (!$setujui) {
                 DB::table('pengajuan_sewa')->where('id_pengajuan', $p->id_pengajuan)->update([
-                    'status' => 'Revisi', 'catatan_admin' => $data['catatan_admin'] ?? null,
+                    'status' => 'Revisi', 'pilihan_crew' => $pilihan,
+                    'harga_final' => $data['harga_final'] ?? $p->harga_final,
+                    'biaya_genset' => $data['biaya_genset'] ?? $p->biaya_genset,
+                    'catatan_admin' => $data['catatan_admin'] ?? null,
                     'diproses_oleh' => $idUser, 'updated_at' => now(),
                 ]);
                 return null;
@@ -100,11 +118,18 @@ class PengajuanService
             }
             $karyawan = DB::table('karyawan')->where('id_user', $idUser)->first();
             if (!$karyawan) throw new RuntimeException('Akun ini belum terhubung dengan data karyawan.');
-            $hargaFinal = (int)$data['harga_final'];
+            $jenisFinal = $pilihan === 'satuan' ? 'Satuan' : 'Paketan';
+            if (($data['jenis_transaksi'] ?? '') !== $jenisFinal) {
+                throw new RuntimeException('Jenis transaksi tidak sesuai pilihan crew yang telah disimpan.');
+            }
             $biayaBarangLuar = 0;
             foreach ($edited as $r) if ($r['tipe_item'] === 'External') $biayaBarangLuar += (int)($r['harga_satuan'] ?? 0) * $r['qty'];
             $biayaGenset = (int)($data['biaya_genset'] ?? 0);
-            if ($hargaFinal <= 0 || $biayaGenset + $biayaBarangLuar >= $hargaFinal) throw new RuntimeException('Harga final harus positif dan mencakup biaya genset.');
+            if ($biayaGenset < 0) throw new RuntimeException('Biaya genset tidak valid.');
+            $hargaFinal = (int)($data['harga_final'] ?? 0);
+            if ($jenisFinal === 'Paketan' && ($hargaFinal <= $biayaGenset + $biayaBarangLuar)) {
+                throw new RuntimeException('Harga paket harus positif dan mencakup biaya genset serta barang mitra.');
+            }
             // Urutkan dan kunci semua barang sebelum memeriksa total qty, termasuk ID berulang.
             $totalPerBarang = [];
             foreach ($edited as $r) {
@@ -128,15 +153,31 @@ class PengajuanService
             }
             $idPelanggan = $p->id_pelanggan ? (int)$p->id_pelanggan : PelangganNomorService::cariAtauBuat($p->nama_pelanggan, $p->no_hp);
             if (isset($data['id_pelanggan']) && (int)$data['id_pelanggan'] !== $idPelanggan) throw new RuntimeException('Pelanggan tidak sesuai dengan pengajuan.');
-            $namaPaket = match ($p->rekomendasi_paket) {
-                'paket2500' => 'Paket 2500', 'paket5000' => 'Paket 5000', default => 'Custom',
+            $namaPaket = match ($pilihan) {
+                'paket2500' => 'Paket 2500',
+                'paket5000' => 'Paket 5000',
+                default => null,
             };
-            $paket = DB::table('paket')->where('nama_paket', $namaPaket)->first();
+            $paket = $namaPaket ? DB::table('paket')->where('nama_paket', $namaPaket)->where('status','Aktif')->first() : null;
+            if ($namaPaket && !$paket) throw new RuntimeException('Paket tidak ditemukan atau sudah nonaktif.');
+            // Satuan dihitung dari harga barang katalog terkini. Barang genset tidak
+            // dikenakan dua kali jika biaya genset sudah ditetapkan tersendiri.
+            if ($jenisFinal === 'Satuan') {
+                $hargaFinal = $biayaGenset + $biayaBarangLuar;
+                foreach ($edited as $r) {
+                    if ($r['tipe_item'] !== 'Barang') continue;
+                    $b = $stockRows[$r['id_barang']];
+                    $isGenset = stripos($b->nama_barang, 'Generator set') !== false || stripos($b->kategori, 'Genset') !== false;
+                    if (!($isGenset && $biayaGenset > 0)) $hargaFinal += (int)$b->harga_sewa * $r['qty'];
+                }
+                if ($hargaFinal <= 0) throw new RuntimeException('Total transaksi satuan harus lebih dari nol.');
+            }
+            $hargaPaketManual = $jenisFinal === 'Paketan' ? $hargaFinal - $biayaGenset - $biayaBarangLuar : 0;
             $idTransaksi = DB::table('transaksi')->insertGetId([
                 'id_pelanggan' => $idPelanggan, 'id_karyawan' => $karyawan->id_karyawan,
-                'jenis_transaksi' => 'Paketan', 'id_paket' => $paket->id_paket ?? null,
+                'jenis_transaksi' => $jenisFinal, 'id_paket' => $paket->id_paket ?? null,
                 'nama_paket' => $namaPaket,
-                'harga_paket_manual' => $hargaFinal - $biayaGenset - $biayaBarangLuar, 'biaya_genset' => $biayaGenset,
+                'harga_paket_manual' => $hargaPaketManual, 'biaya_genset' => $biayaGenset,
                 'tanggal_transaksi' => now()->toDateString(),
                 'tanggal_sewa' => $tanggalSewa->toDateString(), 'tanggal_kembali' => $tanggalKembali->toDateString(),
                 'status_transaksi' => 'Booking', 'total_harga' => $hargaFinal,
@@ -145,13 +186,19 @@ class PengajuanService
             ]);
             foreach ($edited as $r) {
                 $external = $r['tipe_item'] === 'External';
+                $hargaSatuan = $external ? (int)($r['harga_satuan'] ?? 0) : 0;
+                if (!$external && $jenisFinal === 'Satuan') {
+                    $b = $stockRows[$r['id_barang']];
+                    $isGenset = stripos($b->nama_barang, 'Generator set') !== false || stripos($b->kategori, 'Genset') !== false;
+                    $hargaSatuan = ($isGenset && $biayaGenset > 0) ? 0 : (int)$b->harga_sewa;
+                }
                 DB::table('detail_transaksi')->insert([
                     'id_transaksi' => $idTransaksi,
                     'id_barang' => $external ? null : $r['id_barang'],
                     'nama_item_external' => $external ? $r['nama_barang'] : null,
                     'sumber_external' => $external ? $r['sumber_external'] : null,
-                    'qty' => $r['qty'], 'harga_satuan' => $r['harga_satuan'] ?? 0,
-                    'subtotal' => ($r['harga_satuan'] ?? 0) * $r['qty'],
+                    'qty' => $r['qty'], 'harga_satuan' => $hargaSatuan,
+                    'subtotal' => $hargaSatuan * $r['qty'],
                     'tipe_item' => $r['tipe_item'],
                 ]);
             }
@@ -165,6 +212,7 @@ class PengajuanService
             }
             DB::table('pengajuan_sewa')->where('id_pengajuan', $p->id_pengajuan)->update([
                 'status' => $statusBaru, 'id_transaksi' => $idTransaksi,
+                'pilihan_crew' => $pilihan,
                 'catatan_admin' => $data['catatan_admin'] ?? null, 'harga_final' => $hargaFinal,
                 'biaya_genset' => $biayaGenset, 'diproses_oleh' => $idUser, 'updated_at' => now(),
             ]);
@@ -175,17 +223,28 @@ class PengajuanService
     /** Konfirmasi dari halaman Tambah Transaksi, bukan dari tombol pengajuan langsung. */
     public function konfirmasiFormTransaksi(string $kode, array $data, int $idUser): int
     {
-        $jenis = $data['jenis_transaksi'] ?? 'Paketan';
-        if ($jenis !== 'Paketan') throw new RuntimeException('Pengajuan rekomendasi harus disimpan sebagai transaksi Paketan/Custom.');
-        $items = $data['form_items'] ?? [];
+        $pilihan = DB::table('pengajuan_sewa')->where('kode', $kode)->value('pilihan_crew');
+        if (!$pilihan) {
+            $rek = DB::table('pengajuan_sewa')->where('kode', $kode)->value('rekomendasi_paket');
+            $pilihan = $rek === 'custom' ? null : $rek;
+        }
+        if (!in_array($pilihan, ['paket2500','paket5000','satuan'], true)) {
+            throw new RuntimeException('Pilih dan Simpan Revisi jenis paket terlebih dahulu di halaman Tinjau Pengajuan.');
+        }
+        $jenis = $pilihan === 'satuan' ? 'Satuan' : 'Paketan';
+        if (($data['jenis_transaksi'] ?? '') !== $jenis) {
+            throw new RuntimeException('Jenis transaksi berbeda dengan pilihan crew. Kembali ke Pengajuan dan simpan revisi.');
+        }
         $biayaLuar = 0;
-        foreach ($items as $item) {
+        foreach (($data['form_items'] ?? []) as $item) {
             if (($item['tipe_item'] ?? '') === 'External') {
                 $biayaLuar += (int)$item['qty'] * (int)($item['harga_satuan'] ?? 0);
             }
         }
-        $data['harga_final'] = (int)($data['harga_paket_manual'] ?? 0) + (int)($data['biaya_genset'] ?? 0) + $biayaLuar;
-        if ($data['harga_final'] <= 0) throw new RuntimeException('Isi harga paket final terlebih dahulu.');
+        // Untuk Satuan, harga final dihitung ulang dari stok/harga katalog di dalam lock transaksi.
+        $data['harga_final'] = $jenis === 'Paketan'
+            ? (int)($data['harga_paket_manual'] ?? 0) + (int)($data['biaya_genset'] ?? 0) + $biayaLuar
+            : 0;
         $id = $this->simpanDanProses($kode, $data, $idUser, true);
         if (!$id) throw new RuntimeException('Transaksi gagal disimpan.');
         return $id;

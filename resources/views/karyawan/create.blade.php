@@ -1,6 +1,6 @@
 @include('layouts.header')
 
-<div class="jr-form-heading"><div><span class="jr-form-eyebrow">MANAJEMEN JR AUDIO</span><h3>Tambah Karyawan</h3><p class="jr-form-help">Lengkapi data baru lalu simpan.</p></div><a class="btn btn-outline-secondary" href="/admin/karyawan">Kembali</a></div>
+<div class="jr-form-heading"><div><span class="jr-form-eyebrow">MANAJEMEN JR AUDIO</span><h3>Tambah Karyawan</h3><p class="jr-form-help">Lengkapi data baru lalu simpan.</p></div></div>
 <form action="/admin/karyawan/simpan" method="post" class="mt-3 card jr-form-card p-4">
     @csrf
     @include('karyawan.form')
