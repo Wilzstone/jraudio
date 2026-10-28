@@ -157,12 +157,51 @@ class TransaksiModel
             throw $e;
         }
     }
+    /** Status Selesai hanya dibuat oleh proses pengembalian, tidak oleh dropdown. */
     public function updateStatus(int $id, string $status): bool
     {
-        $trx = $this->getById($id);
-        if ($trx && $trx['status_transaksi'] === 'Selesai')
-            throw new Exception('Transaksi sudah selesai dan tidak bisa diubah lagi.');
-        $stmt = $this->db->prepare('UPDATE transaksi SET status_transaksi=? WHERE id_transaksi=?');
-        return $stmt->execute([$status, $id]);
+        if (!in_array($status, ['Berjalan', 'Batal'], true)) {
+            throw new Exception('Status hanya dapat diubah dari Booking ke Berjalan atau Batal. Selesai harus melalui Pengembalian.');
+        }
+        $this->db->beginTransaction();
+        try {
+            $stmt = $this->db->prepare('SELECT * FROM transaksi WHERE id_transaksi=? FOR UPDATE');
+            $stmt->execute([$id]);
+            $trx = $stmt->fetch();
+            if (!$trx) throw new Exception('Transaksi tidak ditemukan.');
+            if ($trx['status_transaksi'] !== 'Booking') {
+                throw new Exception('Hanya transaksi berstatus Booking yang dapat diubah ke Berjalan atau Batal.');
+            }
+            if ($status === 'Batal') {
+                // Refund belum didukung: jangan batalkan transaksi yang sudah mencatat pembayaran.
+                $cek = $this->db->prepare("SELECT COUNT(*) FROM pembayaran WHERE id_transaksi=? AND status_konfirmasi <> 'Ditolak'");
+                $cek->execute([$id]);
+                if ((int)$cek->fetchColumn() > 0) {
+                    throw new Exception('Ada pembayaran tercatat. Selesaikan/refund pembayaran terlebih dahulu sebelum pembatalan.');
+                }
+                $cek = $this->db->prepare('SELECT COUNT(*) FROM pengembalian WHERE id_transaksi=?');
+                $cek->execute([$id]);
+                if ((int)$cek->fetchColumn() > 0) throw new Exception('Barang sudah diproses pengembaliannya.');
+                // Gabungkan detail yang berulang agar stok barang tidak dipulihkan lebih dari jumlah alokasi.
+                $detail = $this->db->prepare("SELECT id_barang, SUM(qty) AS total_qty FROM detail_transaksi WHERE id_transaksi=? AND tipe_item='Barang' AND id_barang IS NOT NULL GROUP BY id_barang ORDER BY id_barang");
+                $detail->execute([$id]);
+                $updateStok = $this->db->prepare("UPDATE barang SET stok=stok+:q1, stok_disewa=stok_disewa-:q2, status='Tersedia' WHERE id_barang=:id AND stok_disewa>=:q3");
+                foreach ($detail->fetchAll() as $item) {
+                    $qty = (int)$item['total_qty'];
+                    $updateStok->execute([':q1'=>$qty, ':q2'=>$qty, ':q3'=>$qty, ':id'=>$item['id_barang']]);
+                    if ($updateStok->rowCount() !== 1) {
+                        throw new Exception('Stok disewa tidak sinkron. Pembatalan dibatalkan agar stok tidak bertambah ganda.');
+                    }
+                }
+            }
+            $up = $this->db->prepare("UPDATE transaksi SET status_transaksi=? WHERE id_transaksi=? AND status_transaksi='Booking'");
+            $up->execute([$status, $id]);
+            if ($up->rowCount() !== 1) throw new Exception('Status transaksi berubah, silakan muat ulang halaman.');
+            $this->db->commit();
+            return true;
+        } catch (Throwable $e) {
+            if ($this->db->inTransaction()) $this->db->rollBack();
+            throw $e;
+        }
     }
 }

@@ -7,7 +7,7 @@
 
 <div class="alert alert-warning">
     Denda keterlambatan dihitung otomatis: <strong>Rp 50.000 per hari</strong> setelah tanggal kembali.
-    Denda akan masuk ke <strong>sisa bayar</strong> transaksi.
+    Denda dicatat setelah pengembalian, kemudian dibayar melalui jenis pembayaran <strong>Denda</strong>.
 </div>
 
 <div class="card mb-4">
@@ -21,6 +21,14 @@
     @csrf
                     <input type="hidden" name="id_transaksi" value="<?= $trx['id_transaksi'] ?>">
 
+                    <?php $sisaSewa = max(0, (int)$trx['total_harga'] - (int)($trx['sudah_bayar_sewa'] ?? 0)); ?>
+                    <?php $sewaBelumMulai = $trx['tanggal_sewa'] > \Carbon\Carbon::today('Asia/Jakarta')->toDateString(); ?>
+                    <?php if ($sewaBelumMulai): ?><div class="alert alert-warning">Penyewaan belum memasuki tanggal mulai. Pengembalian tidak dapat diproses.</div><?php endif; ?>
+                    <?php if ($sisaSewa>0): ?>
+                        <div class="alert alert-warning">Sewa belum lunas: <strong>Rp <?= number_format($sisaSewa,0,',','.') ?></strong>. Selesaikan pembayaran dan konfirmasi terlebih dahulu. <a href="/admin/pembayaran/tambah?id_transaksi=<?= $trx['id_transaksi'] ?>">Bayar sewa</a>.</div>
+                    <?php else: ?>
+                        <div class="alert alert-success">Biaya sewa sudah lunas. Pengembalian dapat diproses.</div>
+                    <?php endif; ?>
                     <div class="row mb-3">
                         <div class="col-md-5">
                             <h5 class="mb-1">#<?= $trx['id_transaksi'] ?> - <?= htmlspecialchars($trx['nama_pelanggan']) ?></h5>
@@ -31,8 +39,8 @@
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Tanggal Pengembalian</label>
-                            <input type="date" name="tanggal_pengembalian" class="form-control" value="<?= htmlspecialchars($trx['tanggal_kembali'] ?? date('Y-m-d')) ?>" required>
-                        <small class="text-muted">Otomatis mengikuti tanggal wajib kembali transaksi, tetapi tetap bisa diganti.</small>
+                            <input type="date" name="tanggal_pengembalian" class="form-control" value="<?= \Carbon\Carbon::today('Asia/Jakarta')->toDateString() ?>" min="<?= \Carbon\Carbon::today('Asia/Jakarta')->toDateString() ?>" max="<?= \Carbon\Carbon::today('Asia/Jakarta')->toDateString() ?>" required>
+                        <small class="text-muted">Tanggal aktual pengembalian adalah hari ini. Denda dihitung dari keterlambatan terhadap tanggal wajib kembali.</small>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Kondisi Umum Barang</label>
@@ -86,7 +94,7 @@
                         <textarea name="catatan" class="form-control" rows="2" placeholder="Catatan tambahan jika ada."></textarea>
                     </div>
 
-                    <button class="btn btn-primary" data-confirm="Proses pengembalian transaksi ini?">Proses Pengembalian</button>
+                    <button class="btn btn-primary" type="submit" <?= ($sisaSewa>0 || $sewaBelumMulai)?'disabled':'' ?> data-jr-confirm="Proses pengembalian transaksi ini? Status akan menjadi Selesai dan stok dipulihkan tepat satu kali.">Proses Pengembalian</button>
                 </form>
             <?php endforeach; ?>
         <?php endif; ?>
@@ -126,7 +134,7 @@
                                 </div>
                             <?php endforeach; ?>
                         </td>
-                        <td>Rp <?= number_format((int) $row['denda'], 0, ',', '.') ?></td>
+                        <td>Rp <?= number_format((int) $row['denda'] + (int) $row['denda_manual'], 0, ',', '.') ?></td>
                         <td><span class="badge bg-success"><?= htmlspecialchars($row['status_transaksi']) ?></span></td>
                         <td>
                             <?= nl2br(htmlspecialchars($row['kondisi_barang'] ?? '-')) ?><br>

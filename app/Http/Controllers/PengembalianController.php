@@ -14,7 +14,7 @@ class PengembalianController extends Controller
     }
     public function store(Request $request,PengembalianModel $model) {
         $data=$request->validate(['id_transaksi'=>'required|integer|exists:transaksi,id_transaksi',
-          'tanggal_pengembalian'=>'required|date','kondisi_barang'=>'required|string|max:255',
+          'tanggal_pengembalian'=>['required','date',\Illuminate\Validation\Rule::in([\Carbon\Carbon::today('Asia/Jakarta')->toDateString()])],'kondisi_barang'=>'required|string|max:255',
           'catatan'=>'nullable|string|max:3000','denda_manual'=>'nullable|integer|min:0',
           'rusak_qty'=>'nullable|array','rusak_qty.*'=>'integer|min:0']);
         try { $model->proses($data);return redirect('/admin/pengembalian')->with('info','Pengembalian diproses. Stok dan denda diperbarui'); }

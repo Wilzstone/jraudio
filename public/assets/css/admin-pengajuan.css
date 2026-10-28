@@ -16,3 +16,10 @@
 .ja-sidebar .ja-navigation{overflow-y:auto;max-height:calc(100vh - 125px);scrollbar-width:thin;padding-bottom:25px}
 @media(max-width:850px){.jr-pengajuan-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.jr-pengajuan-info{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:530px){.jr-pengajuan-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.jr-pengajuan-info{grid-template-columns:1fr}.jr-pengajuan-actions>*{width:100%}}
+
+/* JR Audio v7 — status pengajuan mudah dikenali */
+.jr-status{display:inline-block;line-height:1.4;white-space:nowrap}
+.jr-status-menunggu{background:#fff3cd;color:#7a4c00}
+.jr-status-revisi{background:#dbeafe;color:#174ea6}
+.jr-status-disetujui{background:#d1fae5;color:#136d43}
+.jr-status-batal{background:#fee2e2;color:#a61c25}

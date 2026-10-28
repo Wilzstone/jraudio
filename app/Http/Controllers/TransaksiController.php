@@ -6,6 +6,7 @@ use Throwable;
 use Illuminate\Support\Facades\DB;
 use App\Services\PengajuanService;
 use App\Services\PelangganNomorService;
+use App\Services\PembayaranWorkflowService;
 class TransaksiController extends Controller
 {
     public function index(TransaksiModel $model) {$transaksi=$model->getAll();return view('transaksi.index',compact('transaksi'));}
@@ -16,6 +17,8 @@ class TransaksiController extends Controller
         $old=$request->session()->get('old_input_transaksi',[]);
         $pengajuan = null; $prefillItems = [];
         if ($request->filled('pengajuan')) {
+            // Jangan menimpa paket/jenis dari pengajuan lain dengan old input yang tersisa.
+            if (($old['kode_pengajuan'] ?? null) !== $request->query('pengajuan')) $old = [];
             $barang=(new BarangModel)->getAll();
             $pengajuan = DB::table('pengajuan_sewa')->where('kode', $request->query('pengajuan'))->first();
             abort_unless($pengajuan,404);
@@ -35,14 +38,15 @@ class TransaksiController extends Controller
                     'nama_item_external'=>$r->nama_barang, 'sumber_external'=>$r->sumber_external,
                     'qty'=>$r->qty, 'harga_satuan'=>0,
                 ])->all();
-            $namaPaket = match($pengajuan->rekomendasi_paket) {
-                'paket2500'=>'Paket 2500','paket5000'=>'Paket 5000',default=>'Custom'
+            $pilihanCrew = $pengajuan->pilihan_crew ?: ($pengajuan->rekomendasi_paket === 'custom' ? 'satuan' : $pengajuan->rekomendasi_paket);
+            $namaPaket = match($pilihanCrew) {
+                'paket2500'=>'Paket 2500','paket5000'=>'Paket 5000',default=>null
             };
-            $p = collect($paket)->first(fn($row) => $row['nama_paket'] === $namaPaket);
+            $p = $namaPaket ? collect($paket)->first(fn($row) => $row['nama_paket'] === $namaPaket) : null;
             $old = array_merge([
                 'id_pelanggan' => $pengajuan->id_pelanggan,
-                'jenis_transaksi'=>'Paketan', 'id_paket'=>$p['id_paket'] ?? '',
-                'harga_paket_manual'=>max(0,(int)($pengajuan->harga_final ?? $pengajuan->estimasi_min ?? 0) - (int)$pengajuan->biaya_genset),
+                'jenis_transaksi'=>$pilihanCrew === 'satuan' ? 'Satuan' : 'Paketan', 'id_paket'=>$p['id_paket'] ?? '',
+                'harga_paket_manual'=>$pilihanCrew === 'satuan' ? 0 : max(0,(int)($pengajuan->harga_final ?? $pengajuan->estimasi_min ?? 0) - (int)$pengajuan->biaya_genset),
                 'biaya_genset'=>$pengajuan->biaya_genset,
                 'tanggal_sewa'=>max($pengajuan->tanggal_acara,date('Y-m-d')),
                 'tanggal_kembali'=>max($pengajuan->tanggal_acara,date('Y-m-d')),
@@ -55,7 +59,7 @@ class TransaksiController extends Controller
             'id_pelanggan'=>'required|integer|exists:pelanggan,id_pelanggan',
             'jenis_transaksi'=>'required|in:Satuan,Paketan',
             'tanggal_sewa'=>'required|date','tanggal_kembali'=>'required|date|after_or_equal:tanggal_sewa',
-            'status_transaksi'=>'required|in:Booking,Berjalan',
+            'status_transaksi'=>'required|in:Booking',
             'id_paket'=>'nullable|integer','harga_paket_manual'=>'nullable|integer|min:0',
             'biaya_genset'=>'nullable|integer|min:0',
             'qty'=>'required|array|min:1','qty.*'=>'required|integer|min:1',
@@ -119,7 +123,7 @@ class TransaksiController extends Controller
                 'biaya_genset'=>$request->integer('biaya_genset'),
                 'tanggal_transaksi'=>date('Y-m-d'),'tanggal_sewa'=>$request->input('tanggal_sewa'),
                 'tanggal_kembali'=>$request->input('tanggal_kembali'),
-                'status_transaksi'=>$request->input('status_transaksi'),
+                'status_transaksi'=>'Booking',
                 'alamat_lokasi_acara'=>$request->input('alamat_lokasi_acara'),
                 'link_google_maps'=>$request->input('link_google_maps')
             ],$items);
@@ -132,14 +136,19 @@ class TransaksiController extends Controller
     public function show(Request $request,TransaksiModel $model) {
         $id=$request->integer('id');$data=$model->getById($id);
         if (!$data) return redirect('/admin/transaksi')->with('info','Transaksi tidak ditemukan');
-        $detail=$model->getDetail($id);$pm=new PembayaranModel;
-        $pembayaran=$pm->getByTransaksi($id);$totalBayar=$pm->getTotalDikonfirmasi($id);
-        $totalDenda=$model->getDenda($id);$totalTagihan=(int)$data['total_harga']+$totalDenda;
-        $sisaBayar=max(0,$totalTagihan-$totalBayar);$isSelesai=$data['status_transaksi']==='Selesai';
-        return view('transaksi.show',compact('data','detail','pembayaran','totalBayar','totalDenda','totalTagihan','sisaBayar','isSelesai'));
+        $detail=$model->getDetail($id);
+        $pm=new PembayaranModel;
+        $pembayaran=$pm->getByTransaksi($id);
+        $ringkasan=app(PembayaranWorkflowService::class)->ringkasan($id);
+        $totalDenda=$ringkasan['total_denda'];
+        $totalBayar=$ringkasan['dibayar_sewa']+$ringkasan['dibayar_denda'];
+        $totalTagihan=(int)$data['total_harga']+$totalDenda;
+        $sisaBayar=$ringkasan['sisa_total'];
+        $isSelesai=$data['status_transaksi']==='Selesai';
+        return view('transaksi.show',compact('data','detail','pembayaran','totalBayar','totalDenda','totalTagihan','sisaBayar','isSelesai','ringkasan'));
     }
     public function status(Request $request,TransaksiModel $model) {
-        $data=$request->validate(['id_transaksi'=>'required|integer|exists:transaksi,id_transaksi','status_transaksi'=>'required|in:Booking,Berjalan,Selesai,Batal']);
+        $data=$request->validate(['id_transaksi'=>'required|integer|exists:transaksi,id_transaksi','status_transaksi'=>'required|in:Berjalan,Batal']);
         try {$model->updateStatus((int)$data['id_transaksi'],$data['status_transaksi']);
         return redirect('/admin/transaksi/detail?id='.$data['id_transaksi'])->with('info','Status diubah');
         } catch(Throwable $e) {return back()->with('info',$e->getMessage());}
