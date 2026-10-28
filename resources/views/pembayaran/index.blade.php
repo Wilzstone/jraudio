@@ -5,7 +5,7 @@
     <a href="/admin/pembayaran/tambah" class="btn btn-primary">Tambah Pembayaran</a>
 </div>
 
-<div class="card">
+<div class="card jr-form-card">
     <div class="card-body table-responsive">
         <table class="table table-bordered table-hover align-middle">
             <thead class="table-light">

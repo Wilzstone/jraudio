@@ -1,0 +1,35 @@
+/* JR Audio admin UX v5 – applies to all existing owner/employee CRUD pages. */
+.ja-admin-content{font-size:1rem;line-height:1.55}
+.ja-admin-content h1,.ja-admin-content h2,.ja-admin-content h3{font-weight:800;letter-spacing:-.035em;color:#20232d}
+.ja-admin-content h3{font-size:clamp(1.45rem,2vw,1.9rem);margin-bottom:.4rem}
+.ja-admin-content h4,.ja-admin-content h5{font-weight:750;letter-spacing:-.02em}
+.ja-admin-content .card,.ja-admin-content .jr-pengajuan-panel{border:1px solid #e6e8ed;border-radius:16px;box-shadow:0 5px 20px rgba(16,24,40,.035)}
+.ja-admin-content .card-header{background:#fafbfc;border-color:#eef0f3;padding:16px 20px;font-size:1.08rem;font-weight:760}
+.ja-admin-content .card-body{padding:clamp(16px,2vw,26px)}
+.ja-admin-content .form-label{display:block;color:#313846;font-size:.97rem;font-weight:700;margin-bottom:7px}
+.ja-admin-content .form-control,.ja-admin-content .form-select,.ja-admin-content textarea{font-size:1rem;border:1px solid #cfd4de;border-radius:10px;padding:11px 13px;min-height:44px;box-shadow:none}
+.ja-admin-content textarea{min-height:100px}
+.ja-admin-content .form-control:focus,.ja-admin-content .form-select:focus{border-color:#c82a34;box-shadow:0 0 0 3px rgba(200,42,52,.13)}
+.ja-admin-content .form-control[readonly]{background:#f4f5f7}
+.ja-admin-content .btn{font-size:.95rem;font-weight:700;border-radius:10px;padding:10px 16px;min-height:42px}
+.ja-admin-content .btn-sm{font-size:.89rem;min-height:34px;padding:6px 11px}
+.ja-admin-content .btn-primary{background:#be2934;border-color:#be2934}
+.ja-admin-content .btn-primary:hover{background:#9d1f29;border-color:#9d1f29}
+.ja-admin-content .btn-danger{background:#b32c36;border-color:#b32c36}
+.ja-admin-content .table{font-size:.95rem;vertical-align:middle}
+.ja-admin-content .table th{background:#f7f8fa;color:#333a46;font-weight:800;white-space:nowrap;padding:13px 15px}
+.ja-admin-content .table td{padding:12px 15px}
+.ja-admin-content .table tbody tr:hover{background:#fbfcfd}
+.ja-admin-content .table-responsive{border-radius:12px;overflow-x:auto}
+.ja-admin-content .alert{border-radius:12px;font-size:.95rem;padding:13px 17px}
+.ja-admin-content .text-muted,.ja-admin-content small{font-size:.89rem}
+.jr-form-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:16px}
+.jr-form-eyebrow{display:block;color:#b52d38;font-size:.75rem;letter-spacing:.12em;font-weight:800;margin-bottom:6px}
+.jr-form-help{color:#69717d;margin:0;font-size:.95rem}
+.jr-form-card{max-width:1100px;margin-bottom:22px}
+.jr-form-card .form-control[type=file]{padding:10px}
+.ja-admin-content .barang-row{background:#fbfbfc;border:1px solid #e2e5ea;padding:12px 5px 3px;border-radius:12px;margin:0 0 10px!important}
+.ja-admin-content form button[type=submit]:focus-visible,.ja-admin-content a:focus-visible{outline:3px solid #ef8992;outline-offset:2px}
+.jr-admin-result-empty{padding:24px;text-align:center;color:#647084}
+@media(max-width:767px){.ja-admin-content .card-body{padding:16px}.jr-form-heading{flex-wrap:wrap}.ja-admin-content .btn{max-width:100%}.ja-admin-content .table th,.ja-admin-content .table td{padding:10px 12px}.ja-admin-content .barang-row{padding:12px}}
+@media print{.jr-form-heading .btn{display:none!important}.ja-admin-content .card{box-shadow:none!important}}

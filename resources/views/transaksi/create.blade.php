@@ -1,6 +1,6 @@
 @include('layouts.header')
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h3>Tambah Transaksi Penyewaan</h3><a href="/admin/transaksi" class="btn btn-secondary">Kembali</a>
+    <div><div class="jr-form-eyebrow">PENYEWAAN / JR AUDIO</div><h3>{{ $pengajuan ? 'Konfirmasi & Buat Transaksi' : 'Tambah Transaksi Penyewaan' }}</h3><p class="jr-form-help">{{ $pengajuan ? 'Data dari pengajuan '. $pengajuan->kode .' sudah diisi. Periksa kembali sebelum disimpan.' : 'Lengkapi data penyewaan dan periksa rincian biaya.' }}</p></div><a href="/admin/transaksi" class="btn btn-secondary">Kembali</a>
 </div>
 <?php
 $today = date('Y-m-d');
@@ -14,10 +14,14 @@ foreach ($barang as $b) {
     }
 }
 ?>
-<div class="card">
+@if($pengajuan)
+<div class="alert alert-info">Pengajuan <strong>{{ $pengajuan->kode }}</strong> belum menjadi transaksi. Harga, tanggal, alat, dan lokasi masih bisa diperiksa sebelum penyimpanan.</div>
+@endif
+<div class="card jr-form-card">
     <div class="card-body">
         <form action="/admin/transaksi/simpan" method="post" id="formTransaksi">
     @csrf
+            @if($pengajuan)<input type="hidden" name="kode_pengajuan" value="{{ $pengajuan->kode }}">@endif
             <div class="row">
                 <div class="col-md-4 mb-3"><label class="form-label">Pelanggan</label><select name="id_pelanggan"
                         class="form-select" required>
@@ -36,8 +40,14 @@ foreach ($barang as $b) {
                 <div class="col-md-2 mb-3"><label class="form-label">Status</label><select name="status_transaksi"
                         class="form-select">
                         <option value="Booking">Booking</option>
-                        <option value="Berjalan">Berjalan</option>
+                        <option value="Berjalan" @disabled($pengajuan)>Berjalan</option>
                     </select></div>
+            </div>
+            <div class="row g-3 mb-2">
+                <div class="col-md-7"><label class="form-label">Alamat lokasi acara <span class="text-muted">(diisi crew)</span></label>
+                    <textarea class="form-control" name="alamat_lokasi_acara" rows="2" maxlength="2000" placeholder="Alamat lengkap tempat acara">{{ old('alamat_lokasi_acara') }}</textarea></div>
+                <div class="col-md-5"><label class="form-label">Link Google Maps / Shareloc</label>
+                    <input class="form-control" type="url" name="link_google_maps" maxlength="2048" placeholder="https://maps.app.goo.gl/..." value="{{ old('link_google_maps') }}"><small class="text-muted">Opsional. Isi dari Google Maps, tidak diminta saat konsultasi.</small></div>
             </div>
             <hr>
             <div class="row">
@@ -62,8 +72,7 @@ foreach ($barang as $b) {
             <div class="row">
                 <div class="col-md-4 mb-3"><label class="form-label">Biaya Genset</label><input type="number"
                         name="biaya_genset" id="biaya_genset" class="form-control" min="0"
-                        value="<?= htmlspecialchars($old['biaya_genset'] ?? '0') ?>"><small class="text-muted">Jika diisi,
-                        genset otomatis masuk list barang.</small></div>
+                        value="<?= htmlspecialchars($old['biaya_genset'] ?? '0') ?>"><small class="text-muted">{{ $pengajuan ? 'Biaya genset dari rekomendasi sudah terisi dan dapat diedit.' : 'Jika diisi, cek kembali ketersediaan genset.' }}</small></div>
             </div>
             <hr>
             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -76,7 +85,8 @@ foreach ($barang as $b) {
             <div class="border rounded p-3 mt-3 bg-light"><strong>Estimasi Total:</strong> <span id="preview_total">Rp
                     0</span><br><small>Paketan: harga paket manual + genset + item luar. Satuan: barang + genset + item
                     luar.</small></div>
-            <button class="btn btn-primary mt-3">Simpan Transaksi</button>
+            <button class="btn btn-primary mt-3">{{ $pengajuan ? 'Konfirmasi & Simpan Transaksi' : 'Simpan Transaksi' }}</button>
+            @if($pengajuan)<a href="{{ route('pengajuan.admin.show',['kode'=>$pengajuan->kode]) }}" class="btn btn-outline-secondary mt-3">Kembali ke Pengajuan</a>@endif
         </form>
     </div>
 </div>
@@ -105,7 +115,9 @@ foreach ($barang as $b) {
     </div>
 </template>
 <script>
-    const paketDetail = <?= json_encode($paketDetail) ?>; const idGenset = "<?= $idGenset ?>";
+    const paketDetail = @json($paketDetail); const idGenset = @json((string)$idGenset);
+    const isPengajuan = @json((bool)$pengajuan);
+    const prefillItems = @json($prefillItems);
     function rupiah(v) { return 'Rp ' + Number(v || 0).toLocaleString('id-ID') }
     function tambahBarisBarang(id = '', qty = 1) { const c = document.getElementById('template-barang').content.cloneNode(true); const r = c.querySelector('.barang-row'); r.querySelector('.tipe-item').value = 'Barang'; r.querySelector('.barang-select').value = id; r.querySelector('.qty-input').value = qty; document.getElementById('barang-wrapper').appendChild(c); refreshRows() }
     function tambahBarisExternal(nama = '', sumber = '', qty = 1, harga = 0) { const c = document.getElementById('template-barang').content.cloneNode(true); const r = c.querySelector('.barang-row'); r.querySelector('.tipe-item').value = 'External'; r.querySelector('input[name="nama_item_external[]"]').value = nama; r.querySelector('input[name="sumber_external[]"]').value = sumber; r.querySelector('.qty-input').value = qty; r.querySelector('.harga-manual-item').value = harga; document.getElementById('barang-wrapper').appendChild(c); refreshRows() }
@@ -114,8 +126,8 @@ foreach ($barang as $b) {
     function refreshRows() { document.querySelectorAll('.tipe-item').forEach(toggleRowType); hitungPreview() }
     function clearRows() { document.getElementById('barang-wrapper').innerHTML = '' }
     function loadPaketBarang() { const j = document.getElementById('jenis_transaksi').value, id = document.getElementById('id_paket').value; if (j !== 'Paketan' || !id || !paketDetail[id]) return; clearRows(); paketDetail[id].forEach(i => tambahBarisBarang(i.id_barang, i.qty)); cekGensetOtomatis(); if (!document.querySelector('.barang-row')) tambahBarisBarang(); refreshRows() }
-    function cekGensetOtomatis() { const biaya = Number(document.getElementById('biaya_genset').value || 0); if (biaya <= 0 || !idGenset) return; let ada = false; document.querySelectorAll('.barang-row').forEach(r => { if (r.querySelector('.tipe-item').value === 'Barang' && r.querySelector('.barang-select').value === idGenset) ada = true }); if (!ada) tambahBarisBarang(idGenset, 1) }
-    function toggleJenisTransaksi() { const j = document.getElementById('jenis_transaksi').value; document.querySelectorAll('.paket-field').forEach(e => e.style.display = j === 'Paketan' ? '' : 'none'); document.getElementById('harga_paket_manual').required = j === 'Paketan'; document.getElementById('id_paket').required = j === 'Paketan'; hitungPreview() }
+    function cekGensetOtomatis() { if (isPengajuan) return; const biaya = Number(document.getElementById('biaya_genset').value || 0); if (biaya <= 0 || !idGenset) return; let ada = false; document.querySelectorAll('.barang-row').forEach(r => { if (r.querySelector('.tipe-item').value === 'Barang' && r.querySelector('.barang-select').value === idGenset) ada = true }); if (!ada) tambahBarisBarang(idGenset, 1) }
+    function toggleJenisTransaksi() { const j = document.getElementById('jenis_transaksi').value; document.querySelectorAll('.paket-field').forEach(e => e.style.display = j === 'Paketan' ? '' : 'none'); document.getElementById('harga_paket_manual').required = j === 'Paketan'; document.getElementById('id_paket').required = j === 'Paketan' && !isPengajuan; hitungPreview() }
     function hitungPreview() {
         const j = document.getElementById('jenis_transaksi').value;
         const genset = Number(document.getElementById('biaya_genset').value || 0);
@@ -147,6 +159,21 @@ foreach ($barang as $b) {
         document.getElementById('preview_total').innerText = rupiah(total);
     }
     function updateTanggalKembaliLimit() { const s = document.getElementById('tanggal_sewa'), k = document.getElementById('tanggal_kembali'); if (!s.value) return; const d = new Date(s.value), m = new Date(d); m.setDate(m.getDate() + 7); const ms = m.toISOString().slice(0, 10); k.min = s.value; k.max = ms; if (!k.value || k.value < s.value) k.value = s.value; if (k.value > ms) k.value = ms }
-    document.addEventListener('input', e => { if (e.target.matches('.qty-input,#harga_paket_manual,#biaya_genset,.harga-manual-item')) { if (e.target.id === 'biaya_genset') cekGensetOtomatis(); hitungPreview() } }); document.addEventListener('change', e => { if (e.target.matches('.barang-select,.tipe-item')) hitungPreview() }); document.getElementById('jenis_transaksi').addEventListener('change', function () { toggleJenisTransaksi(); if (this.value === 'Paketan') loadPaketBarang() }); document.getElementById('id_paket').addEventListener('change', loadPaketBarang); document.getElementById('tanggal_sewa').addEventListener('change', updateTanggalKembaliLimit); document.addEventListener('DOMContentLoaded', () => { tambahBarisBarang(); toggleJenisTransaksi(); updateTanggalKembaliLimit(); refreshRows() });
+    document.addEventListener('input', e => { if (e.target.matches('.qty-input,#harga_paket_manual,#biaya_genset,.harga-manual-item')) { if (e.target.id === 'biaya_genset') cekGensetOtomatis(); hitungPreview() } }); document.addEventListener('change', e => { if (e.target.matches('.barang-select,.tipe-item')) hitungPreview() }); document.getElementById('jenis_transaksi').addEventListener('change', function () { toggleJenisTransaksi(); if (this.value === 'Paketan' && !isPengajuan) loadPaketBarang() }); document.getElementById('id_paket').addEventListener('change', () => { if(!isPengajuan) loadPaketBarang(); }); document.getElementById('tanggal_sewa').addEventListener('change', updateTanggalKembaliLimit); document.addEventListener('DOMContentLoaded', () => {
+        if (isPengajuan) {
+            document.getElementById('jenis_transaksi').value = 'Paketan';
+            prefillItems.forEach(i => {
+                if (i.tipe_item === 'Barang') tambahBarisBarang(String(i.id_barang || ''), i.qty);
+                else tambahBarisExternal(i.nama_item_external, i.sumber_external || '', i.qty, i.harga_satuan || 0);
+            });
+            // Paket custom memakai id_paket kosong, tanpa membuat stok/barang baru.
+            document.getElementById('jenis_transaksi').disabled = true;
+            document.getElementById('id_paket').disabled = true;
+            // Disabled selects tidak ikut POST; kirim jenis dari hidden.
+            const h=document.createElement('input'); h.type='hidden'; h.name='jenis_transaksi'; h.value='Paketan'; document.getElementById('formTransaksi').appendChild(h);
+            const paketHidden=document.createElement('input'); paketHidden.type='hidden'; paketHidden.name='id_paket'; paketHidden.value=document.getElementById('id_paket').value; document.getElementById('formTransaksi').appendChild(paketHidden);
+        } else tambahBarisBarang();
+        toggleJenisTransaksi(); updateTanggalKembaliLimit(); refreshRows();
+    });
 </script>
 @include('layouts.footer')

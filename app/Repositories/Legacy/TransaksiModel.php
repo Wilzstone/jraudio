@@ -126,12 +126,14 @@ class TransaksiModel
                 $data['nama_paket'] = null;
             }
             $stmt = $this->db->prepare("INSERT INTO transaksi (id_pelanggan,id_karyawan,jenis_transaksi,id_paket,
-            nama_paket,harga_paket_manual,biaya_genset,tanggal_transaksi,tanggal_sewa,tanggal_kembali,status_transaksi,total_harga)
-             VALUES (:id_pelanggan,:id_karyawan,:jenis_transaksi,:id_paket,:nama_paket,:harga_paket_manual,:biaya_genset,:tanggal_transaksi,:tanggal_sewa,:tanggal_kembali,:status_transaksi,:total_harga)");
+            nama_paket,harga_paket_manual,biaya_genset,tanggal_transaksi,tanggal_sewa,tanggal_kembali,status_transaksi,total_harga,alamat_lokasi_acara,link_google_maps)
+             VALUES (:id_pelanggan,:id_karyawan,:jenis_transaksi,:id_paket,:nama_paket,:harga_paket_manual,:biaya_genset,:tanggal_transaksi,:tanggal_sewa,:tanggal_kembali,:status_transaksi,:total_harga,:alamat_lokasi_acara,:link_google_maps)");
             $stmt->execute([':id_pelanggan' => $data['id_pelanggan'], ':id_karyawan' => $data['id_karyawan'], ':jenis_transaksi' 
             => $jenis, ':id_paket' => $data['id_paket'] ?: null, ':nama_paket' => $data['nama_paket'] ?: null, ':harga_paket_manual' => $hargaPaket,
              ':biaya_genset' => $genset, ':tanggal_transaksi' => $data['tanggal_transaksi'], ':tanggal_sewa' => $data['tanggal_sewa'],
-              ':tanggal_kembali' => $data['tanggal_kembali'], ':status_transaksi' => $data['status_transaksi'], ':total_harga' => $total]);
+              ':tanggal_kembali' => $data['tanggal_kembali'], ':status_transaksi' => $data['status_transaksi'], ':total_harga' => $total,
+                ':alamat_lokasi_acara' => $data['alamat_lokasi_acara'] ?? null,
+                ':link_google_maps' => $data['link_google_maps'] ?? null]);
             $id = (int) $this->db->lastInsertId();
             $ins = $this->db->prepare("INSERT INTO detail_transaksi (id_transaksi,id_barang,nama_item_external,sumber_external,qty,harga_satuan,subtotal,tipe_item)
              VALUES (:id_transaksi,:id_barang,:nama_item_external,:sumber_external,:qty,:harga_satuan,:subtotal,:tipe_item)");

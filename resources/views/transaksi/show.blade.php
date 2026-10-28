@@ -23,6 +23,10 @@
                     <tr><td width="180">Pelanggan</td><td>: <?= htmlspecialchars($data['nama_pelanggan']) ?></td></tr>
                     <tr><td>No HP</td><td>: <?= htmlspecialchars($data['no_hp']) ?></td></tr>
                     <tr><td>Alamat</td><td>: <?= htmlspecialchars($data['alamat']) ?></td></tr>
+                    <tr><td>Lokasi acara</td><td>: <?= nl2br(htmlspecialchars($data['alamat_lokasi_acara'] ?? '-')) ?></td></tr>
+                    <?php if (!empty($data['link_google_maps']) && preg_match('~^https://~i', $data['link_google_maps'])): ?>
+                    <tr><td>Google Maps</td><td>: <a href="<?= htmlspecialchars($data['link_google_maps'],ENT_QUOTES) ?>" target="_blank" rel="noopener noreferrer">Lihat lokasi acara ↗</a></td></tr>
+                    <?php endif; ?>
                     <tr><td>Karyawan</td><td>: <?= htmlspecialchars($data['nama_karyawan']) ?></td></tr>
                     <tr><td>Jenis</td><td>: <?= htmlspecialchars($data['jenis_transaksi'] ?? 'Satuan') ?></td></tr>
                     <tr><td>Paket</td><td>: <?= htmlspecialchars($data['nama_paket'] ?? '-') ?></td></tr>
@@ -154,7 +158,7 @@
                                     </select>
                                     <button class="btn btn-sm btn-success">Update</button>
                                 </form>
-                                <form action="/admin/pembayaran/hapus" method="post" class="d-inline" onsubmit="return confirm('Yakin hapus pembayaran ini?')">@csrf<input type="hidden" name="id" value="<?= $row['id_pembayaran'] ?>"><button class="btn btn-sm btn-danger" type="submit">Hapus</button></form>
+                                <form action="/admin/pembayaran/hapus" method="post" class="d-inline" data-jr-confirm="Yakin hapus pembayaran ini?">@csrf<input type="hidden" name="id" value="<?= $row['id_pembayaran'] ?>"><button class="btn btn-sm btn-danger" type="submit">Hapus</button></form>
                             <?php else: ?>
                                 <span class="text-muted">Terkunci</span>
                             <?php endif; ?>

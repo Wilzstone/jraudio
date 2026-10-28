@@ -18,6 +18,8 @@
     @endif
     <link rel="stylesheet" href="{{ asset('assets/css/admin-pengajuan.css') }}?v=1.0">
     <link rel="stylesheet" href="{{ asset('assets/css/sweetalert2.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/admin-forms-v5.css') }}?v=5.0">
+    <script src="{{ asset('assets/js/admin-crud-v5.js') }}?v=5.0" defer></script>
 </head>
 <body class="ja-admin-page">
 <div class="ja-app" id="jaApp">

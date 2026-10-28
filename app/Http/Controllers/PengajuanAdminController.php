@@ -25,16 +25,17 @@ class PengajuanAdminController extends Controller
         $detail = DB::table('pengajuan_detail')->where('id_pengajuan', $pengajuan->id_pengajuan)->orderBy('id_pengajuan_detail')->get();
         $barang = DB::table('barang')->orderBy('nama_barang')->get();
         $kebutuhan = json_decode($pengajuan->kebutuhan_json, true) ?: [];
-        return view('admin.pengajuan.show', compact('pengajuan', 'detail', 'barang', 'kebutuhan'));
+        $pelangganTertaut = $pengajuan->id_pelanggan ? DB::table('pelanggan')->where('id_pelanggan',$pengajuan->id_pelanggan)->first() : null;
+        return view('admin.pengajuan.show', compact('pengajuan', 'detail', 'barang', 'kebutuhan', 'pelangganTertaut'));
     }
 
     public function simpan(Request $request, string $kode, PengajuanService $service)
     {
         $data = $request->validate([
-            'aksi' => 'required|in:revisi,setujui',
-            'tanggal_sewa' => 'nullable|required_if:aksi,setujui|date',
-            'tanggal_kembali' => 'nullable|required_if:aksi,setujui|date|after_or_equal:tanggal_sewa',
-            'harga_final' => 'nullable|required_if:aksi,setujui|integer|min:1|max:1000000000',
+            'aksi' => 'required|in:revisi',
+            'tanggal_sewa' => 'nullable|date',
+            'tanggal_kembali' => 'nullable|date|after_or_equal:tanggal_sewa',
+            'harga_final' => 'nullable|integer|min:1|max:1000000000',
             'biaya_genset' => 'nullable|integer|min:0|max:1000000000',
             'catatan_admin' => 'nullable|string|max:2000',
             'items' => 'nullable|array',
@@ -51,7 +52,7 @@ class PengajuanAdminController extends Controller
             'items.*.qty' => 'required|integer|min:1|max:10000',
         ]);
         try {
-            $id = $service->simpanDanProses($kode, $data, (int)$request->user()->id_user, $data['aksi'] === 'setujui');
+            $id = $service->simpanDanProses($kode, $data, (int)$request->user()->id_user, false);
             return $id
                 ? redirect('/admin/transaksi/detail?id='.$id)->with('info', 'Pengajuan telah disetujui dan menjadi transaksi Booking #'.$id)
                 : redirect()->route('pengajuan.admin.show', ['kode'=>$kode])->with('info', 'Perubahan tersimpan. Status pengajuan: Revisi.');

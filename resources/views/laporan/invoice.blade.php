@@ -40,7 +40,11 @@
             <table class="table table-sm table-borderless">
                 <tr><td width="140">Nama</td><td>: <?= htmlspecialchars($transaksi['nama_pelanggan']) ?></td></tr>
                 <tr><td>No HP</td><td>: <?= htmlspecialchars($transaksi['no_hp']) ?></td></tr>
-                <tr><td>Alamat</td><td>: <?= htmlspecialchars($transaksi['alamat']) ?></td></tr>
+                <tr><td>Alamat pelanggan</td><td>: <?= htmlspecialchars($transaksi['alamat']) ?></td></tr>
+                <tr><td>Lokasi acara</td><td>: <?= htmlspecialchars($transaksi['alamat_lokasi_acara'] ?? '-') ?></td></tr>
+                <?php if (!empty($transaksi['link_google_maps'])): ?>
+                  <tr><td>Google Maps</td><td>: <?= htmlspecialchars($transaksi['link_google_maps']) ?></td></tr>
+                <?php endif; ?>
             </table>
         </div>
         <div class="col-md-6">
