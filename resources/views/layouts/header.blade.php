@@ -16,6 +16,7 @@
         <link rel="stylesheet" href="{{ asset('assets/css/admin-data-tables.css') }}?v=4.0">
         <script src="{{ asset('assets/js/admin-data-tables.js') }}?v=4.0" defer></script>
     @endif
+    <link rel="stylesheet" href="{{ asset('assets/css/admin-pengajuan.css') }}?v=1.0">
     <link rel="stylesheet" href="{{ asset('assets/css/sweetalert2.min.css') }}">
 </head>
 <body class="ja-admin-page">

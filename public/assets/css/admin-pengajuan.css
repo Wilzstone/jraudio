@@ -1,0 +1,18 @@
+.jr-pengajuan-page{max-width:1450px;margin:0 auto;padding:12px 0 32px;font-size:15px;color:#202329}
+.jr-pengajuan-title{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:22px}
+.jr-pengajuan-title h1{font-size:clamp(26px,2.8vw,36px);font-weight:800;margin:0 0 6px;letter-spacing:-.03em}
+.jr-pengajuan-title p{color:#62666d;margin:0}
+.jr-overline{font-size:12px;letter-spacing:.12em;font-weight:800;color:#ad1d24}
+.jr-pengajuan-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px}
+.jr-kpi{display:block;color:inherit;background:#fff;padding:18px 20px;border:1px solid #e7e7eb;border-radius:12px;text-decoration:none}
+.jr-kpi small{display:block;font-size:14px;color:#656974}.jr-kpi strong{display:block;font-size:29px;letter-spacing:-.04em}
+.jr-pengajuan-panel{background:#fff;border:1px solid #e6e6eb;border-radius:14px;padding:clamp(15px,2vw,25px);margin-bottom:18px}
+.jr-pengajuan-panel h2{font-size:20px;font-weight:800;margin:0 0 15px}.jr-pengajuan-panel td,.jr-pengajuan-panel th{padding:13px 9px;font-size:14px}
+.jr-pengajuan-panel td small{display:block;color:#757983}.jr-pengajuan-panel .form-control,.jr-pengajuan-panel .form-select{font-size:14px;min-width:115px}
+.jr-pengajuan-controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.jr-status{padding:6px 9px;border-radius:7px;background:#f3f3f5;font-weight:700}
+.jr-pengajuan-info{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin-bottom:16px}.jr-pengajuan-info>div{background:#f8f8f9;padding:12px;border-radius:8px}
+.jr-pengajuan-info small{display:block;color:#666}.jr-pengajuan-info strong{display:block;overflow-wrap:anywhere;margin-top:3px}
+.jr-pengajuan-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:21px}
+.ja-sidebar .ja-navigation{overflow-y:auto;max-height:calc(100vh - 125px);scrollbar-width:thin;padding-bottom:25px}
+@media(max-width:850px){.jr-pengajuan-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.jr-pengajuan-info{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:530px){.jr-pengajuan-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.jr-pengajuan-info{grid-template-columns:1fr}.jr-pengajuan-actions>*{width:100%}}

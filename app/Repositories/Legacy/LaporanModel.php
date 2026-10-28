@@ -41,20 +41,26 @@ class LaporanModel
     }
     public function getLaporanTransaksi(string $mulai, string $selesai): array
     {
+        // Agregasi pembayaran dan denda sebelum JOIN agar aman pada ONLY_FULL_GROUP_BY.
+        // Satu transaksi tetap menghasilkan satu baris, walaupun memiliki banyak pembayaran.
         $stmt = $this->db->prepare("SELECT t.*, p.nama_pelanggan, k.nama_karyawan,
-                COALESCE(SUM(CASE WHEN pb.status_konfirmasi = 'Dikonfirmasi' THEN pb.jumlah_bayar ELSE 0 END), 0) AS total_bayar,
+                COALESCE(pb.total_bayar, 0) AS total_bayar,
                 COALESCE(pg.total_denda, 0) AS total_denda
             FROM transaksi t
             JOIN pelanggan p ON t.id_pelanggan = p.id_pelanggan
             JOIN karyawan k ON t.id_karyawan = k.id_karyawan
-            LEFT JOIN pembayaran pb ON t.id_transaksi = pb.id_transaksi
+            LEFT JOIN (
+                SELECT id_transaksi, SUM(jumlah_bayar) AS total_bayar
+                FROM pembayaran
+                WHERE status_konfirmasi = 'Dikonfirmasi'
+                GROUP BY id_transaksi
+            ) pb ON t.id_transaksi = pb.id_transaksi
             LEFT JOIN (
                 SELECT id_transaksi, SUM(denda + denda_manual) AS total_denda
                 FROM pengembalian
                 GROUP BY id_transaksi
             ) pg ON t.id_transaksi = pg.id_transaksi
             WHERE t.tanggal_transaksi BETWEEN ? AND ?
-            GROUP BY t.id_transaksi
             ORDER BY t.tanggal_transaksi DESC, t.id_transaksi DESC");
         $stmt->execute([$mulai, $selesai]);
         return $stmt->fetchAll();
@@ -74,12 +80,19 @@ class LaporanModel
 
     public function getLaporanBarang(): array
     {
+        // Hitung rekap per barang dalam subquery agar SELECT b.* tidak melanggar
+        // SQL mode ONLY_FULL_GROUP_BY.
         $stmt = $this->db->query("SELECT b.*,
-                COALESCE(SUM(dt.qty), 0) AS total_disewa,
-                COALESCE(SUM(dt.subtotal), 0) AS total_pemasukan_barang
+                COALESCE(dt.total_disewa, 0) AS total_disewa,
+                COALESCE(dt.total_pemasukan_barang, 0) AS total_pemasukan_barang
             FROM barang b
-            LEFT JOIN detail_transaksi dt ON b.id_barang = dt.id_barang
-            GROUP BY b.id_barang
+            LEFT JOIN (
+                SELECT id_barang, SUM(qty) AS total_disewa,
+                       SUM(subtotal) AS total_pemasukan_barang
+                FROM detail_transaksi
+                WHERE id_barang IS NOT NULL
+                GROUP BY id_barang
+            ) dt ON b.id_barang = dt.id_barang
             ORDER BY b.nama_barang ASC");
         return $stmt->fetchAll();
     }
@@ -98,9 +111,10 @@ class LaporanModel
 
     public function getDetailTransaksi(int $idTransaksi): array
     {
-        $stmt = $this->db->prepare("SELECT dt.*, b.nama_barang, b.kategori
+        $stmt = $this->db->prepare("SELECT dt.*, COALESCE(b.nama_barang, dt.nama_item_external) AS nama_barang,
+                   COALESCE(b.kategori, 'External') AS kategori
             FROM detail_transaksi dt
-            JOIN barang b ON dt.id_barang = b.id_barang
+            LEFT JOIN barang b ON dt.id_barang = b.id_barang
             WHERE dt.id_transaksi = ?");
         $stmt->execute([$idTransaksi]);
         return $stmt->fetchAll();

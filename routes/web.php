@@ -1,6 +1,6 @@
 <?php
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\{AuthController, PublicController, BarangController, KaryawanController, PelangganController, DashboardController, TransaksiController, PembayaranController, PengembalianController, LaporanController, RekomendasiController};
+use App\Http\Controllers\{AuthController, PublicController, BarangController, KaryawanController, PelangganController, DashboardController, TransaksiController, PembayaranController, PengembalianController, LaporanController, RekomendasiController, PengajuanPublikController, PengajuanAdminController};
 
 Route::get('/', [PublicController::class, 'index']);
 Route::get('/home', [PublicController::class, 'index']);
@@ -8,11 +8,18 @@ foreach (['tentang','barang','lokasi','kontak','paket','galeri','partner'] as $h
     Route::get('/'.$halaman, [PublicController::class, $halaman]);
 }
 Route::get('/rekomendasi', [RekomendasiController::class, 'index'])->name('rekomendasi.index');
+Route::get('/rekomendasi/hasil/{draftToken}', [RekomendasiController::class, 'hasil'])->where('draftToken', '[A-Za-z0-9]{40}')->name('rekomendasi.hasil');
 Route::post('/rekomendasi', [RekomendasiController::class, 'proses'])->middleware('throttle:12,1')->name('rekomendasi.proses');
+Route::post('/pengajuan/simpan', [PengajuanPublikController::class, 'simpan'])->middleware('throttle:8,1')->name('pengajuan.public.simpan');
+Route::get('/pengajuan/{kode}', [PengajuanPublikController::class, 'show'])->where('kode', 'JR-[0-9]{6}-[A-Z0-9]{12}')->name('pengajuan.public.show');
 Route::get('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/proses-login', [AuthController::class, 'prosesLogin'])->middleware('throttle:5,1');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/admin/pengajuan', [PengajuanAdminController::class, 'index'])->name('pengajuan.admin.index');
+    Route::get('/admin/pengajuan/{kode}', [PengajuanAdminController::class, 'show'])->name('pengajuan.admin.show');
+    Route::post('/admin/pengajuan/{kode}/simpan', [PengajuanAdminController::class, 'simpan'])->name('pengajuan.admin.simpan');
+    Route::post('/admin/pengajuan/{kode}/batal', [PengajuanAdminController::class, 'batalkan'])->name('pengajuan.admin.batal');
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/cek-ketersediaan', [BarangController::class, 'index']);
     Route::get('/transaksi', [TransaksiController::class, 'index']);

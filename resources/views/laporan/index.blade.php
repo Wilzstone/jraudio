@@ -21,8 +21,6 @@
     <div class="card-header">Filter Laporan</div>
     <div class="card-body">
         <form method="get" class="row g-3">
-            <input type="hidden" name="controller" value="laporan">
-            <input type="hidden" name="action" value="index">
             <div class="col-md-4">
                 <label class="form-label">Tanggal Mulai</label>
                 <input type="date" name="tanggal_mulai" class="form-control" value="<?= htmlspecialchars($tanggalMulai) ?>">

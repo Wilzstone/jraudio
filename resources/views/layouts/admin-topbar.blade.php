@@ -10,6 +10,7 @@
         str_contains($topPath, 'pelanggan') => 'Pelanggan',
         str_contains($topPath, 'karyawan') => 'Karyawan',
         str_contains($topPath, 'pembayaran') => 'Pembayaran',
+        str_contains($topPath, 'pengajuan') => 'Pengajuan Sewa',
         str_contains($topPath, 'laporan') => 'Laporan',
         default => 'Dashboard',
     };
@@ -20,6 +21,9 @@
         <span class="ja-breadcrumb">JR AUDIO <span>/</span> {{ strtoupper($topRole) }} <span>/</span> <strong>{{ strtoupper($topPage) }}</strong></span>
     </div>
     <div class="ja-topbar-right">
+        @if($topRole === 'Owner')
+          <a class="ja-top-report" href="{{ url('/admin/laporan') }}" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;font-weight:700;font-size:13px;color:#ab2029;margin-right:12px">Laporan</a>
+        @endif
         <details class="ja-user-menu" id="jaUserMenu">
             <summary class="ja-user-trigger" aria-label="Menu akun {{ $topName }}">
                 <span class="ja-topbar-avatar">{{ mb_strtoupper(mb_substr($topName, 0, 1)) }}</span>
