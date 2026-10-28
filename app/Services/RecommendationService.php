@@ -261,13 +261,26 @@ class RecommendationService
         }
 
         if ($perluGenset) {
-            $items[] = [
-                'id_barang' => null, 'nama_barang' => 'Genset (sumber dikonfirmasi crew)',
-                'peran' => 'Daya listrik tambahan', 'jumlah' => 1,
-                'jumlah_vendor' => 1, 'sumber_external' => 'Konfirmasi crew',
-                'harga_satuan' => 400000, 'subtotal' => 400000,
-            ];
-            $kebutuhanCrew[] = 'Genset otomatis ditambahkan dengan biaya awal Rp400.000. Biaya bisa disesuaikan oleh crew.';
+            // Genset JR Audio adalah barang INTERNAL. Jangan membuat item External
+            // otomatis: id_barang diperlukan agar pengajuan -> transaksi -> stok konsisten.
+            $genset = $katalog->first(fn ($b) =>
+                strtolower(trim((string) $b->nama_barang)) === 'generator set 9 sd 20 kva'
+            );
+            if ($genset) {
+                $tambahkan('Daya listrik tambahan', 1,
+                    fn ($b) => (int) $b->id_barang === (int) $genset->id_barang,
+                    'Generator set 9 sd 20 kVA dari inventaris JR Audio. Kapasitas daya perlu dikonfirmasi crew.');
+                $aturan[] = 'R11: listrik kurang => Generator set 9 sd 20 kVA internal';
+                if (max(0, (int) ($genset->stok_estimasi_tanggal ?? $genset->stok)) < 1) {
+                    $kebutuhanCrew[] = 'Generator set 9 sd 20 kVA belum tersedia pada perkiraan stok. Crew harus menyelesaikan ketersediaan sebelum transaksi disimpan.';
+                }
+            } else {
+                // Tidak mengarang ID inventaris dan tidak mengubahnya menjadi External.
+                $estimasiLengkap = false;
+                $kebutuhanCrew[] = 'Generator set 9 sd 20 kVA belum tercatat di inventaris. Crew perlu memeriksa data barang sebelum transaksi.';
+                $catatan[] = 'Barang genset yang diminta tidak ditemukan di katalog; tidak dibuat item luar otomatis.';
+            }
+            $kebutuhanCrew[] = 'Biaya genset awal Rp400.000 dan dapat disesuaikan oleh crew saat transaksi.';
         }
         if ($butuhVendor) {
             $kebutuhanCrew[] = 'Sebagian perlengkapan perlu dicek ketersediaannya. Tim JR Audio akan membantu mencari alternatif.';
@@ -283,7 +296,7 @@ class RecommendationService
         }
 
         $catatan[] = 'Data tanggal menggunakan catatan booking aktif untuk estimasi konflik; tidak menjamin ketersediaan final dan tidak mengunci stok.';
-        $catatan[] = 'Harga pada tabel adalah acuan harga barang SATUAN dari katalog, bukan harga resmi paket. Biaya transportasi dan genset di luar harga paket dan harus dikonfirmasi.';
+        $catatan[] = 'Harga pada tabel adalah acuan harga barang SATUAN dari katalog, bukan harga resmi paket. Biaya transportasi di luar harga paket; genset menggunakan biaya awal Rp400.000 bila dibutuhkan.';
         $catatan[] = 'Tidak ada booking/pengurangan stok yang dilakukan. Rekomendasi ini dapat dijadikan bahan penawaran, tetapi hanya final setelah persetujuan crew.';
         // Evaluasi anggaran baru dilakukan dengan RENTANG HARGA PAKET dari tabel paket,
         // bukan total harga satuan yang tidak merepresentasikan tarif bundling.

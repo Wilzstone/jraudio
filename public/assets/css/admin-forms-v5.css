@@ -33,3 +33,18 @@
 .jr-admin-result-empty{padding:24px;text-align:center;color:#647084}
 @media(max-width:767px){.ja-admin-content .card-body{padding:16px}.jr-form-heading{flex-wrap:wrap}.ja-admin-content .btn{max-width:100%}.ja-admin-content .table th,.ja-admin-content .table td{padding:10px 12px}.ja-admin-content .barang-row{padding:12px}}
 @media print{.jr-form-heading .btn{display:none!important}.ja-admin-content .card{box-shadow:none!important}}
+
+/* v6 – konsisten dan tidak dempet pada form Tambah/Edit, transaksi, pengajuan */
+.ja-admin-content .jr-form-actions,
+.ja-admin-content .jr-pengajuan-actions {
+    display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-start;
+    gap:12px 14px; margin-top:22px;
+}
+.ja-admin-content .jr-form-actions > .btn,
+.ja-admin-content .jr-pengajuan-actions > .btn { margin:0!important; width:auto; }
+.ja-admin-content .jr-form-actions > .btn:first-child { min-width:155px; }
+.ja-admin-content .jr-pengajuan-panel form + form { margin-top:14px; }
+@media (max-width:575px) {
+  .ja-admin-content .jr-form-actions > .btn,
+  .ja-admin-content .jr-pengajuan-actions > .btn { flex:1 1 150px; }
+}

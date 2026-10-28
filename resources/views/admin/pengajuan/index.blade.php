@@ -1,7 +1,7 @@
 @include('layouts.header')
 <section class="jr-pengajuan-page">
   <div class="jr-pengajuan-title"><div><span class="jr-overline">PENYEWAAN / JR AUDIO</span><h1>Pengajuan Sewa</h1><p>Tinjau permintaan konsultasi dari website. Data ini belum menjadi transaksi.</p></div>
-  @if(auth()->user()?->role === 'Owner')<a class="btn btn-outline-secondary" href="{{ url('/admin/laporan') }}">Lihat Laporan</a>@endif</div>
+</div>
   <div class="jr-pengajuan-stats">
     @foreach(['Menunggu','Revisi','Disetujui','Batal'] as $nama)
       <a href="{{ route('pengajuan.admin.index', ['status'=>$nama]) }}" class="jr-kpi"><small>{{ $nama }}</small><strong>{{ number_format((int)($counts[$nama] ?? 0),0,',','.') }}</strong></a>

@@ -13,5 +13,7 @@
     <textarea name="alamat" class="form-control" rows="4"><?= htmlspecialchars($data['alamat'] ?? '') ?></textarea>
 </div>
 
-<button type="submit" class="btn btn-primary">Simpan</button>
-<a href="/admin/pelanggan" class="btn btn-secondary">Kembali</a>
+<div class="jr-form-actions">
+    <button type="submit" class="btn btn-primary">{{ isset($data) ? 'Update Pelanggan' : 'Simpan Pelanggan' }}</button>
+    <a href="/admin/pelanggan" class="btn btn-outline-secondary">Kembali</a>
+</div>

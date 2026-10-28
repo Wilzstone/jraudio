@@ -4,8 +4,10 @@
 <form action="/admin/barang/simpan" method="post" enctype="multipart/form-data" class="mt-3 card jr-form-card p-4">
     @csrf
     @include('barang.form')
+    <div class="jr-form-actions">
     <button type="submit" class="btn btn-primary">Simpan</button>
     <a href="/admin/barang" class="btn btn-secondary">Kembali</a>
+    </div>
 </form>
 
 @include('layouts.footer')

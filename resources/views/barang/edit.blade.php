@@ -5,8 +5,10 @@
     @csrf
     <input type="hidden" name="id_barang" value="<?= $data['id_barang']; ?>">
     @include('barang.form')
+    <div class="jr-form-actions">
     <button type="submit" class="btn btn-success">Update</button>
     <a href="/admin/barang" class="btn btn-secondary">Kembali</a>
+    </div>
 </form>
 
 @include('layouts.footer')
