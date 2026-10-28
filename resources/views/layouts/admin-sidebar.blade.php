@@ -8,6 +8,7 @@
             ['Pelanggan', '/admin/pelanggan', 'pelanggan'],
             ['Karyawan', '/admin/karyawan', 'karyawan'],
             ['Transaksi', '/admin/transaksi', 'transaksi'],
+            ['Pengajuan Sewa', '/admin/pengajuan', 'transaksi'],
             ['Pembayaran', '/admin/pembayaran', 'pembayaran'],
             ['Pengembalian', '/admin/pengembalian', 'pengembalian'],
             ['Laporan', '/admin/laporan', 'laporan'],
@@ -15,6 +16,7 @@
         : [
             ['Cek Ketersediaan', '/cek-ketersediaan', 'barang'],
             ['Transaksi', '/transaksi', 'transaksi'],
+            ['Pengajuan Sewa', '/admin/pengajuan', 'transaksi'],
             ['Buat Transaksi', '/transaksi/tambah', 'plus'],
             ['Pengembalian', '/pengembalian', 'pengembalian'],
         ];
