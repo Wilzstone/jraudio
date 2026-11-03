@@ -1,6 +1,6 @@
 @include('layouts.header')
 <section class="jr-pengajuan-page">
-  <div class="jr-pengajuan-title"><div><span class="jr-overline">TINJAU PENGAJUAN</span><h1>{{ $pengajuan->kode }}</h1><p>{{ $pengajuan->nama_pelanggan }} · {{ $pengajuan->no_hp }} · Status: <span class="jr-status jr-status-{{ strtolower($pengajuan->status) }}">{{ $pengajuan->status }}</span></p></div>
+  <div class="jr-pengajuan-title"><div><span class="jr-overline">TINJAU PENGAJUAN</span><h1>{{ \App\Support\KodePengajuan::dari($pengajuan) }}</h1><p>{{ $pengajuan->nama_pelanggan }} · {{ $pengajuan->no_hp }} · Status: <span class="jr-status jr-status-{{ strtolower($pengajuan->status) }}">{{ $pengajuan->status }}</span></p></div>
     </div>
   <div class="jr-pengajuan-panel">
     <h2>Detail Acara</h2>

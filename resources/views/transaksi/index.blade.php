@@ -27,7 +27,7 @@
         </div>
         <div class="ja-inventory-meta"><p data-ja-counter role="status" aria-live="polite">Menampilkan {{ $total }} dari {{ $total }} transaksi</p><button type="button" class="ja-reset-filter" data-ja-reset hidden>Reset filter</button></div>
         <div class="ja-list-table-wrap"><table class="ja-list-table ja-list-transactions" aria-label="Daftar transaksi penyewaan JR Audio">
-            <thead><tr><th scope="col">Transaksi / Pelanggan</th><th scope="col">Jenis</th><th scope="col">Jadwal Sewa</th><th scope="col">Petugas</th><th scope="col">Status</th><th scope="col">Total</th><th scope="col" class="ja-list-right">Aksi</th></tr></thead>
+            <thead><tr><th scope="col">Transaksi / Pelanggan</th><th scope="col">Jenis</th><th scope="col">Jadwal Sewa</th><th scope="col">Petugas</th><th scope="col">Status</th><th scope="col">Pembayaran</th><th scope="col">Total</th><th scope="col" class="ja-list-right">Aksi</th></tr></thead>
             <tbody data-ja-body>
                 @foreach ($items as $row)
                     @php
@@ -47,6 +47,16 @@
                         <td data-label="Jadwal"><span class="ja-list-dates"><strong>{{ $start !== '' ? date('d/m/Y', strtotime($start)) : '—' }}</strong><small>s.d. {{ $end !== '' ? date('d/m/Y', strtotime($end)) : '—' }}</small></span></td>
                         <td data-label="Petugas"><span class="ja-list-regular">{{ $staff }}</span></td>
                         <td data-label="Status"><span class="ja-list-badge {{ $class }}"><i aria-hidden="true"></i>{{ $status !== '' ? $status : '—' }}</span></td>
+                        @php
+                           $dibayarSewa=(int)($row['terbayar_sewa']??0);
+                           $sisaSewa=max(0,$amount-$dibayarSewa);
+                           $sisaDenda=max(0,(int)($row['denda_transaksi']??0)-(int)($row['terbayar_denda']??0)-max(0,$dibayarSewa-$amount));
+                           $labelBayar=$status==='Batal'?'Batal':($sisaSewa===0?'Lunas':($dibayarSewa>0?'DP':'Belum Bayar'));
+                           $warnaBayar=$labelBayar==='Lunas'?'bg-success':($labelBayar==='DP'?'bg-warning text-dark':'bg-secondary');
+                        @endphp
+                        <td data-label="Pembayaran"><span class="badge {{ $warnaBayar }}">{{ $labelBayar }}</span>
+                        @if($sisaSewa>0 && $status!=='Batal')<small class="d-block text-muted">Sisa Rp {{ number_format($sisaSewa,0,',','.') }}</small>@endif
+                        @if($sisaDenda>0)<span class="badge bg-danger">Denda Rp {{ number_format($sisaDenda,0,',','.') }}</span>@endif</td>
                         <td data-label="Total"><strong class="ja-list-money">Rp {{ number_format($amount, 0, ',', '.') }}</strong></td>
                         <td data-label="Aksi" class="ja-list-actions-cell"><div class="ja-action-group"><a class="ja-action-edit ja-list-detail" href="{{ url('/admin/transaksi/detail') }}?id={{ $id }}" aria-label="Detail transaksi nomor {{ $id }}">Lihat Detail <span aria-hidden="true">→</span></a></div></td>
                     </tr>

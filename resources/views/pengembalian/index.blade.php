@@ -135,7 +135,10 @@
                             <?php endforeach; ?>
                         </td>
                         <td>Rp <?= number_format((int) $row['denda'] + (int) $row['denda_manual'], 0, ',', '.') ?></td>
-                        <td><span class="badge bg-success"><?= htmlspecialchars($row['status_transaksi']) ?></span></td>
+                        <td><span class="badge bg-success">Sudah Dikembalikan</span>
+                            <?php $rusakTotal = array_sum(array_map(fn($d) => (int)$d['qty_rusak'], $detailRiwayat[$row['id_pengembalian']] ?? [])); ?>
+                            <?php if ($rusakTotal > 0): ?><span class="badge bg-warning text-dark">Rusak <?= $rusakTotal ?> unit</span><?php else: ?><span class="badge bg-info text-dark">Semua Baik</span><?php endif; ?>
+                            <?php if ((int)$row['denda']+(int)$row['denda_manual'] > 0): ?><span class="badge bg-danger">Ada Denda</span><?php endif; ?></td>
                         <td>
                             <?= nl2br(htmlspecialchars($row['kondisi_barang'] ?? '-')) ?><br>
                             <small><?= nl2br(htmlspecialchars($row['catatan'] ?? '-')) ?></small>

@@ -48,6 +48,7 @@ class PengajuanService
                         'sumber_external' => $jenis === 'External' ? trim((string)($item['sumber_external'] ?? '')) : null,
                         'qty' => (int)($item['qty'] ?? 0),
                         'harga_satuan' => $jenis === 'External' ? max(0,(int)($item['harga_satuan'] ?? 0)) : 0,
+                        'harga_mitra' => $jenis === 'External' ? ($item['harga_mitra'] ?? null) : null,
                     ];
                 }
                 if (!$edited) throw new RuntimeException('Tambahkan paling sedikit satu perlengkapan.');
@@ -136,6 +137,12 @@ class PengajuanService
                 if ($r['tipe_item'] === 'Barang') {
                     $totalPerBarang[$r['id_barang']] = ($totalPerBarang[$r['id_barang']] ?? 0) + $r['qty'];
                 } else {
+                    if ($setujui && (!array_key_exists('harga_mitra',$r) || $r['harga_mitra'] === null)) {
+                        throw new RuntimeException('Harga modal mitra wajib diisi pada Form Transaksi.');
+                    }
+                    if ($setujui && (int)($r['harga_mitra'] ?? 0) < 0) {
+                        throw new RuntimeException('Biaya mitra tidak boleh negatif.');
+                    }
                     if (!$r['nama_barang'] || !$r['sumber_external'] || in_array(mb_strtolower(trim($r['sumber_external'])), ['konfirmasi crew', 'perlu ditentukan'], true)) {
                         throw new RuntimeException('Nama barang dan sumber mitra wajib diisi untuk item External.');
                     }
@@ -198,6 +205,7 @@ class PengajuanService
                     'nama_item_external' => $external ? $r['nama_barang'] : null,
                     'sumber_external' => $external ? $r['sumber_external'] : null,
                     'qty' => $r['qty'], 'harga_satuan' => $hargaSatuan,
+                    'harga_mitra' => $external ? (int)($r['harga_mitra'] ?? 0) : null,
                     'subtotal' => $hargaSatuan * $r['qty'],
                     'tipe_item' => $r['tipe_item'],
                 ]);

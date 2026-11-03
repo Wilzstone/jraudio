@@ -78,6 +78,24 @@ class LaporanModel
         return $stmt->fetchAll();
     }
 
+    /** Margin hanya dari baris mitra dengan biaya diketahui; bukan laba bersih perusahaan. */
+    public function getLaporanMitra(string $mulai, string $selesai): array
+    {
+        $stmt = $this->db->prepare("SELECT dt.id_detail, t.id_transaksi, t.tanggal_transaksi,
+            p.nama_pelanggan, dt.nama_item_external AS nama_barang, dt.sumber_external,
+            dt.qty, dt.harga_satuan AS harga_pelanggan, dt.harga_mitra,
+            dt.subtotal AS total_jual, (dt.qty * dt.harga_mitra) AS biaya_mitra,
+            (dt.subtotal - dt.qty * dt.harga_mitra) AS margin
+            FROM detail_transaksi dt
+            JOIN transaksi t ON t.id_transaksi=dt.id_transaksi
+            JOIN pelanggan p ON p.id_pelanggan=t.id_pelanggan
+            WHERE dt.tipe_item='External' AND t.status_transaksi <> 'Batal'
+              AND t.tanggal_transaksi BETWEEN ? AND ?
+            ORDER BY t.tanggal_transaksi DESC, dt.id_detail DESC");
+        $stmt->execute([$mulai,$selesai]);
+        return $stmt->fetchAll();
+    }
+
     public function getLaporanBarang(): array
     {
         // Hitung rekap per barang dalam subquery agar SELECT b.* tidak melanggar

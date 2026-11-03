@@ -66,13 +66,15 @@ class PembayaranWorkflowService
             if (DB::table('pembayaran')->where('id_transaksi', $id)->where('status_konfirmasi', 'Menunggu')->exists()) {
                 throw new RuntimeException('Masih ada pembayaran Menunggu. Konfirmasi atau tolak pembayaran itu terlebih dahulu.');
             }
-            return (int) DB::table('pembayaran')->insertGetId([
+            $idPembayaran = (int) DB::table('pembayaran')->insertGetId([
                 'id_transaksi' => $id,
                 'tanggal_bayar' => $data['tanggal_bayar'],
                 'jumlah_bayar' => $nominal,
                 'jenis_pembayaran' => $jenis,
                 'status_konfirmasi' => $data['status_konfirmasi'],
             ]);
+            if ($data['status_konfirmasi'] === 'Dikonfirmasi') app(NotifikasiPembayaranService::class)->siapkan($idPembayaran);
+            return $idPembayaran;
         }, 3);
     }
 
@@ -105,6 +107,7 @@ class PembayaranWorkflowService
                 }
             }
             DB::table('pembayaran')->where('id_pembayaran', $idPembayaran)->update(['status_konfirmasi' => $status]);
+            if ($status === 'Dikonfirmasi') app(NotifikasiPembayaranService::class)->siapkan($idPembayaran);
             return (int)$trx->id_transaksi;
         }, 3);
     }

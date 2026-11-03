@@ -11,7 +11,8 @@ class PembayaranController extends Controller
     public function index(PembayaranModel $model)
     {
         $pembayaran = $model->getAll();
-        return view('pembayaran.index', compact('pembayaran'));
+        $notifikasiIds = \Illuminate\Support\Facades\DB::table('notifikasi_pembayaran')->pluck('id_pembayaran')->mapWithKeys(fn($id)=>[(int)$id=>true])->all();
+        return view('pembayaran.index', compact('pembayaran','notifikasiIds'));
     }
 
     public function create(Request $request, PembayaranWorkflowService $workflow)

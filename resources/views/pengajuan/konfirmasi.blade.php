@@ -8,7 +8,7 @@
   <section class="section section-ivory"><div class="container" style="max-width:870px;padding-top:30px;padding-bottom:50px">
     <div style="background:white;border-radius:16px;padding:clamp(18px,4vw,32px);box-shadow:0 8px 30px #0001">
       <span class="eyebrow">KODE PENGAJUAN</span>
-      <h2 style="overflow-wrap:anywhere;margin:9px 0">{{ $pengajuan->kode }}</h2>
+      <h2 style="overflow-wrap:anywhere;margin:9px 0">{{ \App\Support\KodePengajuan::dari($pengajuan) }}</h2>
       <p style="color:#555">Simpan kode ini untuk memudahkan tim kami mencari rincian pengajuanmu.</p>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:14px;margin:18px 0">
         <div><small>Status</small><p><strong>{{ $pengajuan->status }}</strong></p></div>

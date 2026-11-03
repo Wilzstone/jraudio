@@ -103,6 +103,30 @@
 </div>
 
 <div class="card mb-4">
+ <div class="card-header">Harga Sewa & Proyeksi Margin Barang Mitra</div>
+ <div class="card-body">
+  <p class="text-muted">Margin = harga tagihan mitra ke pelanggan - biaya sewa dari mitra. Ini <strong>margin kotor</strong>, bukan laba bersih; tidak memasukkan transport, crew, dan biaya operasional. Angka hanya untuk transaksi tidak batal pada rentang tanggal transaksi.</p>
+  @php
+    $mitraDiketahui=collect($laporanMitra)->filter(fn($r)=>$r['harga_mitra']!==null);
+    $belumAdaBiaya=collect($laporanMitra)->filter(fn($r)=>$r['harga_mitra']===null)->count();
+  @endphp
+  <div class="row g-2 mb-3">
+   <div class="col-md-4"><div class="border rounded p-3"><small>Nilai Tagihan Mitra (Biaya Tercatat)</small><h5>Rp {{ number_format($mitraDiketahui->sum('total_jual'),0,',','.') }}</h5></div></div>
+   <div class="col-md-4"><div class="border rounded p-3"><small>Biaya ke Mitra</small><h5>Rp {{ number_format($mitraDiketahui->sum('biaya_mitra'),0,',','.') }}</h5></div></div>
+   <div class="col-md-4"><div class="border rounded p-3"><small>Margin Kotor Mitra</small><h5>Rp {{ number_format($mitraDiketahui->sum('margin'),0,',','.') }}</h5></div></div>
+  </div>
+  @if($belumAdaBiaya)<div class="alert alert-warning">{{ $belumAdaBiaya }} baris mitra lama belum memiliki catatan biaya mitra; tidak dihitung dalam total margin di atas.</div>@endif
+  <div class="table-responsive"><table class="table table-striped table-bordered align-middle"><thead><tr><th>Transaksi</th><th>Item / Mitra</th><th>Qty</th><th>Harga Pelanggan / Unit</th><th>Biaya Mitra / Unit</th><th>Margin Kotor</th></tr></thead><tbody>
+  @forelse($laporanMitra as $r)
+   <tr><td>#{{ $r['id_transaksi'] }}<br><small>{{ $r['tanggal_transaksi'] }}</small></td>
+   <td>{{ $r['nama_barang'] }}<br><small>{{ $r['sumber_external'] }}</small></td><td>{{ $r['qty'] }}</td><td>Rp {{ number_format($r['harga_pelanggan'],0,',','.') }}</td>
+   <td>{{ $r['harga_mitra']===null ? 'Belum Dicatat' : 'Rp '.number_format($r['harga_mitra'],0,',','.') }}</td><td>{{ $r['margin']===null ? '-' : 'Rp '.number_format($r['margin'],0,',','.') }}</td></tr>
+  @empty <tr><td colspan="6" class="text-center">Belum ada item mitra dalam periode ini.</td></tr> @endforelse
+  </tbody></table></div>
+ </div>
+</div>
+
+<div class="card mb-4">
     <div class="card-header">Laporan Barang</div>
     <div class="card-body table-responsive">
         <table class="table table-bordered table-striped align-middle">
