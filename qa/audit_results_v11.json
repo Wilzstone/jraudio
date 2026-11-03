@@ -1,0 +1,135 @@
+{
+  "jenis": "AUDIT STATIS - bukan hasil uji fungsi aplikasi",
+  "total_php": 69,
+  "total_js_nonmin": 10,
+  "php_lolos": 69,
+  "js_lolos": 10,
+  "pemeriksaan": [
+    {
+      "pemeriksaan": "Sintaks PHP",
+      "status": "LULUS",
+      "keterangan": "69 lolos, 0 gagal, 0 timeout/alat tidak ada",
+      "file": ""
+    },
+    {
+      "pemeriksaan": "Sintaks JavaScript (nonminified)",
+      "status": "LULUS",
+      "keterangan": "10 lolos, 0 gagal, 0 timeout/alat tidak ada",
+      "file": ""
+    },
+    {
+      "pemeriksaan": "Referensi view() dan @include",
+      "status": "LULUS",
+      "keterangan": "Semua referensi view literal ditemukan",
+      "file": ""
+    },
+    {
+      "pemeriksaan": "Referensi asset() literal",
+      "status": "LULUS",
+      "keterangan": "Semua asset() literal ada",
+      "file": ""
+    },
+    {
+      "pemeriksaan": "Route ke metode controller",
+      "status": "LULUS",
+      "keterangan": "Semua pasangan controller-metode ditemukan",
+      "file": ""
+    },
+    {
+      "pemeriksaan": "Integrasi Horeg/favicon",
+      "status": "LULUS",
+      "keterangan": "Tersedia",
+      "file": "resources/views/games/horeg/garage.blade.php"
+    },
+    {
+      "pemeriksaan": "Integrasi Horeg/favicon",
+      "status": "LULUS",
+      "keterangan": "Tersedia",
+      "file": "public/assets/horeg/garage-v080.js"
+    },
+    {
+      "pemeriksaan": "Integrasi Horeg/favicon",
+      "status": "LULUS",
+      "keterangan": "Tersedia",
+      "file": "public/assets/horeg/rules-v080.mjs"
+    },
+    {
+      "pemeriksaan": "Integrasi Horeg/favicon",
+      "status": "LULUS",
+      "keterangan": "Tersedia",
+      "file": "public/assets/horeg/motion-v080.mjs"
+    },
+    {
+      "pemeriksaan": "Integrasi Horeg/favicon",
+      "status": "LULUS",
+      "keterangan": "Tersedia",
+      "file": "public/assets/horeg/boot-v080.js"
+    },
+    {
+      "pemeriksaan": "Integrasi Horeg/favicon",
+      "status": "LULUS",
+      "keterangan": "Tersedia",
+      "file": "public/assets/horeg/garage-v080.css"
+    },
+    {
+      "pemeriksaan": "Integrasi Horeg/favicon",
+      "status": "LULUS",
+      "keterangan": "Tersedia",
+      "file": "public/favicon.ico"
+    },
+    {
+      "pemeriksaan": "Rahasia dalam ZIP/source",
+      "status": "LULUS",
+      "keterangan": "Tidak ada .env asli",
+      "file": ""
+    },
+    {
+      "pemeriksaan": "composer.lock",
+      "status": "PERLU DICEK",
+      "keterangan": "Tidak ada; versi dependency tidak terkunci",
+      "file": ""
+    },
+    {
+      "pemeriksaan": "vendor/autoload.php",
+      "status": "BELUM DIUJI",
+      "keterangan": "Laravel feature/integration tests hanya bisa dijalankan jika composer install sudah dilakukan",
+      "file": ""
+    },
+    {
+      "pemeriksaan": "Migration tabel pengajuan v1",
+      "status": "PERHATIAN",
+      "keterangan": "Database sebelumnya sudah memiliki tabel pengajuan_sewa; jangan jalankan semua migrate sebelum menyelaraskan tabel migrations",
+      "file": "database/migrations/2026_10_28_000001_create_jr_pengajuan_tables.php"
+    },
+    {
+      "pemeriksaan": "SQL impor dan patch historis",
+      "status": "INFORMASI",
+      "keterangan": "File SQL lama tidak dieksekusi otomatis: OPSIONAL_KONVERSI_PENGAJUAN_GENSET_LAMA.sql, SQL_TAMBAHAN_EVALUASI_V5_MYSQL57.sql, SQL_TAMBAHAN_PENGAJUAN_MYSQL57.sql, SQL_TAMBAHAN_PILIHAN_CREW_V8_MYSQL57.sql, jr_audio_CONTOH_JANGAN_IMPORT_KE_PRODUKSI.sql, jr_audio_dev_import.sql",
+      "file": ""
+    },
+    {
+      "pemeriksaan": "Route game publik",
+      "status": "LULUS",
+      "keterangan": "/game/horeg terdaftar tanpa middleware auth",
+      "file": ""
+    },
+    {
+      "pemeriksaan": "Logo tab non-globe",
+      "status": "LULUS",
+      "keterangan": "Logo JR Audio asli dipakai di header; favicon JR dipasang untuk tab browser",
+      "file": ""
+    }
+  ],
+  "summary": {
+    "LULUS": 15,
+    "PERLU DICEK": 1,
+    "BELUM DIUJI": 1,
+    "PERHATIAN": 1,
+    "INFORMASI": 1
+  },
+  "php_gagal": [],
+  "js_gagal": [],
+  "missing_views": [],
+  "missing_assets": [],
+  "missing_methods": []
+}
