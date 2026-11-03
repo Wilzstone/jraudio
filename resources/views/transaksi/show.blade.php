@@ -179,6 +179,9 @@
                                 <form action="/admin/pembayaran/hapus" method="post" class="d-inline" data-jr-confirm="Yakin hapus pembayaran ini?">@csrf<input type="hidden" name="id" value="<?= $row['id_pembayaran'] ?>"><button class="btn btn-sm btn-danger" type="submit">Hapus</button></form>
                             <?php else: ?>
                                 <span class="text-muted"><?= $row['status_konfirmasi'] === 'Menunggu' ? 'Menunggu Owner' : ($row['status_konfirmasi'] === 'Dikonfirmasi' ? 'Terkunci' : 'Ditolak') ?></span>
+                                @if(auth()->user()?->role==='Owner' && $row['status_konfirmasi']==='Dikonfirmasi' && \Illuminate\Support\Facades\DB::table('notifikasi_pembayaran')->where('id_pembayaran',$row['id_pembayaran'])->exists())
+                                <a class="btn btn-sm btn-outline-success" href="{{ route('pembayaran.notifikasi.show',['id'=>$row['id_pembayaran']]) }}">Info WhatsApp</a>
+                                @endif
                             <?php endif; ?>
                         </td>
                     </tr>

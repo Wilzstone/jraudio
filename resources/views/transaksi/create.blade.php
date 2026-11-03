@@ -1,6 +1,6 @@
 @include('layouts.header')
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <div><div class="jr-form-eyebrow">PENYEWAAN / JR AUDIO</div><h3>{{ $pengajuan ? 'Konfirmasi & Buat Transaksi' : 'Tambah Transaksi Penyewaan' }}</h3><p class="jr-form-help">{{ $pengajuan ? 'Data dari pengajuan '. $pengajuan->kode .' sudah diisi. Periksa kembali sebelum disimpan.' : 'Lengkapi data penyewaan dan periksa rincian biaya.' }}</p></div>
+    <div><div class="jr-form-eyebrow">PENYEWAAN / JR AUDIO</div><h3>{{ $pengajuan ? 'Konfirmasi & Buat Transaksi' : 'Tambah Transaksi Penyewaan' }}</h3><p class="jr-form-help">{{ $pengajuan ? 'Data dari pengajuan '. \App\Support\KodePengajuan::dari($pengajuan) .' sudah diisi. Periksa kembali sebelum disimpan.' : 'Lengkapi data penyewaan dan periksa rincian biaya.' }}</p></div>
 </div>
 <?php
 $today = date('Y-m-d');
@@ -15,7 +15,7 @@ foreach ($barang as $b) {
 }
 ?>
 @if($pengajuan)
-<div class="alert alert-info">Pengajuan <strong>{{ $pengajuan->kode }}</strong> belum menjadi transaksi. Harga, tanggal, alat, dan lokasi masih bisa diperiksa sebelum penyimpanan.</div>
+<div class="alert alert-info">Pengajuan <strong>{{ \App\Support\KodePengajuan::dari($pengajuan) }}</strong> belum menjadi transaksi. Harga, tanggal, alat, dan lokasi masih bisa diperiksa sebelum penyimpanan.</div>
 @endif
 <div class="card jr-form-card">
     <div class="card-body">
@@ -79,8 +79,7 @@ foreach ($barang as $b) {
             </div>
             <div id="barang-wrapper"></div>
             <div class="border rounded p-3 mt-3 bg-light"><strong>Estimasi Total:</strong> <span id="preview_total">Rp
-                    0</span><br><small>Paketan: harga paket manual + genset + item luar. Satuan: barang + genset + item
-                    luar.</small></div>
+                    0</span><br><small>Paketan: harga paket + genset + item mitra. Satuan: barang + genset + item mitra. Biaya mitra dicatat terpisah untuk laporan margin.</small></div>
             <div class="jr-form-actions">
               <button type="submit" class="btn btn-primary">{{ $pengajuan ? 'Konfirmasi & Simpan Transaksi' : 'Simpan Transaksi' }}</button>
               <a href="{{ $pengajuan ? route('pengajuan.admin.show',['kode'=>$pengajuan->kode]) : url('/admin/transaksi') }}" class="btn btn-outline-secondary">{{ $pengajuan ? 'Kembali ke Pengajuan' : 'Kembali' }}</a>
@@ -94,20 +93,21 @@ foreach ($barang as $b) {
                 <option value="Barang">Barang</option>
                 <option value="External">Item Luar</option>
             </select></div>
-        <div class="col-md-4 barang-field"><select name="id_barang[]" class="form-select barang-select">
+        <div class="col-md-3 barang-field"><select name="id_barang[]" class="form-select barang-select">
                 <option value="">-- Pilih Barang --</option><?php foreach ($barang as $b): ?>
                     <option value="<?= $b['id_barang'] ?>" data-harga="<?= (int) $b['harga_sewa'] ?>"
                         data-stok="<?= (int) $b['stok'] ?>"><?= htmlspecialchars($b['nama_barang']) ?> | tersedia
                         <?= (int) $b['stok'] ?> | Rp <?= number_format((int) $b['harga_sewa'], 0, ',', '.') ?></option>
                 <?php endforeach; ?>
             </select></div>
-        <div class="col-md-3 external-field"><input type="text" name="nama_item_external[]" class="form-control"
+        <div class="col-md-2 external-field"><input type="text" name="nama_item_external[]" class="form-control"
                 placeholder="Nama item luar, contoh: Tenda"><input type="text" name="sumber_external[]"
                 class="form-control mt-1" placeholder="Pinjam/sewa dari mana?"></div>
         <div class="col-md-1"><input type="number" name="qty[]" class="form-control qty-input" min="1" value="1"
                 required></div>
         <div class="col-md-1 external-field"><input type="number" name="harga_manual_item[]"
-                class="form-control harga-manual-item" min="0" value="0" placeholder="Harga"></div>
+                class="form-control harga-manual-item" min="0" value="0" placeholder="Harga pelanggan" title="Harga sewa yang ditagihkan kepada pelanggan per unit"></div>
+        <div class="col-md-2 external-field"><input type="number" name="harga_mitra_item[]" class="form-control harga-mitra-item" min="0" placeholder="Biaya mitra" title="Biaya sewa yang dibayarkan kepada mitra per unit, isi 0 bila gratis"></div>
         <div class="col-md-1"><button type="button" class="btn btn-danger w-100" onclick="hapusBaris(this)">X</button>
         </div>
     </div>
@@ -118,9 +118,9 @@ foreach ($barang as $b) {
     const prefillItems = @json($prefillItems);
     function rupiah(v) { return 'Rp ' + Number(v || 0).toLocaleString('id-ID') }
     function tambahBarisBarang(id = '', qty = 1) { const c = document.getElementById('template-barang').content.cloneNode(true); const r = c.querySelector('.barang-row'); r.querySelector('.tipe-item').value = 'Barang'; r.querySelector('.barang-select').value = id; r.querySelector('.qty-input').value = qty; document.getElementById('barang-wrapper').appendChild(c); refreshRows(); window.JRMoney?.refresh() }
-    function tambahBarisExternal(nama = '', sumber = '', qty = 1, harga = 0) { const c = document.getElementById('template-barang').content.cloneNode(true); const r = c.querySelector('.barang-row'); r.querySelector('.tipe-item').value = 'External'; r.querySelector('input[name="nama_item_external[]"]').value = nama; r.querySelector('input[name="sumber_external[]"]').value = sumber; r.querySelector('.qty-input').value = qty; r.querySelector('.harga-manual-item').value = harga; document.getElementById('barang-wrapper').appendChild(c); refreshRows(); window.JRMoney?.refresh() }
+    function tambahBarisExternal(nama = '', sumber = '', qty = 1, harga = 0, hargaMitra = '') { const c = document.getElementById('template-barang').content.cloneNode(true); const r = c.querySelector('.barang-row'); r.querySelector('.tipe-item').value = 'External'; r.querySelector('input[name="nama_item_external[]"]').value = nama; r.querySelector('input[name="sumber_external[]"]').value = sumber; r.querySelector('.qty-input').value = qty; r.querySelector('.harga-manual-item').value = harga; r.querySelector('.harga-mitra-item').value = hargaMitra; document.getElementById('barang-wrapper').appendChild(c); refreshRows(); window.JRMoney?.refresh() }
     function hapusBaris(b) { if (document.querySelectorAll('.barang-row').length > 1) b.closest('.barang-row').remove(); hitungPreview() }
-    function toggleRowType(s) { const r = s.closest('.barang-row'), ex = s.value === 'External'; r.querySelectorAll('.barang-field').forEach(e => e.style.display = ex ? 'none' : ''); r.querySelectorAll('.external-field').forEach(e => e.style.display = ex ? '' : 'none'); r.querySelector('input[name="nama_item_external[]"]').required = ex; if (ex) r.querySelector('.barang-select').value = ''; hitungPreview() }
+    function toggleRowType(s) { const r = s.closest('.barang-row'), ex = s.value === 'External'; r.querySelectorAll('.barang-field').forEach(e => e.style.display = ex ? 'none' : ''); r.querySelectorAll('.external-field').forEach(e => e.style.display = ex ? '' : 'none'); r.querySelector('input[name="nama_item_external[]"]').required = ex; r.querySelector('.harga-mitra-item').required=ex; if (ex) r.querySelector('.barang-select').value = ''; hitungPreview() }
     function refreshRows() { document.querySelectorAll('.tipe-item').forEach(toggleRowType); hitungPreview() }
     function clearRows() { document.getElementById('barang-wrapper').innerHTML = '' }
     function loadPaketBarang() { const j = document.getElementById('jenis_transaksi').value, id = document.getElementById('id_paket').value; if (j !== 'Paketan' || !id || !paketDetail[id]) return; clearRows(); paketDetail[id].forEach(i => tambahBarisBarang(i.id_barang, i.qty)); cekGensetOtomatis(); if (!document.querySelector('.barang-row')) tambahBarisBarang(); refreshRows() }
@@ -162,7 +162,7 @@ foreach ($barang as $b) {
             document.getElementById('jenis_transaksi').value = @json($oldJenis);
             prefillItems.forEach(i => {
                 if (i.tipe_item === 'Barang') tambahBarisBarang(String(i.id_barang || ''), i.qty);
-                else tambahBarisExternal(i.nama_item_external, i.sumber_external || '', i.qty, i.harga_satuan || 0);
+                else tambahBarisExternal(i.nama_item_external, i.sumber_external || '', i.qty, i.harga_satuan || 0, i.harga_mitra ?? '');
             });
             // Jenis (Satuan/Paketan) mengikuti pilihan crew yang tersimpan di pengajuan.
             document.getElementById('jenis_transaksi').disabled = true;

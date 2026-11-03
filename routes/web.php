@@ -1,5 +1,6 @@
 <?php
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\NotifikasiPembayaranController;
 use App\Http\Controllers\{AuthController, PublicController, BarangController, KaryawanController, PelangganController, DashboardController, TransaksiController, PembayaranController, PengembalianController, LaporanController, RekomendasiController, PengajuanPublikController, PengajuanAdminController};
 
 Route::get('/', [PublicController::class, 'index']);
@@ -56,6 +57,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/admin/pelanggan/update', [PelangganController::class, 'update']);
         Route::post('/admin/pelanggan/hapus', [PelangganController::class, 'delete']);
         Route::get('/admin/pembayaran', [PembayaranController::class, 'index']);
+        Route::get('/admin/pembayaran/notifikasi/{id}', [NotifikasiPembayaranController::class,'show'])->whereNumber('id')->name('pembayaran.notifikasi.show');
+        Route::post('/admin/pembayaran/notifikasi/{id}/tandai', [NotifikasiPembayaranController::class,'tandai'])->whereNumber('id')->name('pembayaran.notifikasi.tandai');
+        Route::get('/admin/pembayaran/pengingat', [NotifikasiPembayaranController::class,'pengingatIndex'])->name('pembayaran.pengingat.index');
+        Route::get('/admin/pembayaran/pengingat/{id}', [NotifikasiPembayaranController::class,'pengingatShow'])->whereNumber('id')->name('pembayaran.pengingat.show');
         Route::post('/admin/pembayaran/status', [PembayaranController::class, 'status']);
         Route::post('/admin/pembayaran/hapus', [PembayaranController::class, 'delete']);
         Route::get('/admin/laporan', [LaporanController::class, 'index']);

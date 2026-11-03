@@ -5,7 +5,7 @@
   'use strict';
   const moneyNames = new Set([
     'harga_sewa', 'harga_paket_manual', 'harga_final', 'biaya_genset',
-    'harga_manual_item', 'jumlah_bayar', 'denda_manual', 'harga_satuan',
+    'harga_manual_item', 'harga_mitra_item', 'jumlah_bayar', 'denda_manual', 'harga_satuan',
     'biaya_transportasi', 'total_harga'
   ]);
   const digits = value => String(value == null ? '' : value).replace(/[^\d]/g, '');

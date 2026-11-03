@@ -9,11 +9,16 @@
   </div>
   <div class="jr-pengajuan-panel">
     <div class="jr-pengajuan-controls"><h2>Daftar Pengajuan</h2><a href="{{ route('pengajuan.admin.index') }}">Tampilkan Semua</a></div>
+    <form method="get" action="{{ route('pengajuan.admin.index') }}" class="d-flex gap-2 flex-wrap mb-3">
+      @if($status)<input type="hidden" name="status" value="{{ $status }}">@endif
+      <input type="search" class="form-control" name="cari" maxlength="100" value="{{ $cari }}" style="max-width:360px" placeholder="Cari kode PGJ-..., nama atau nomor HP" aria-label="Cari pengajuan">
+      <button type="submit" class="btn btn-outline-primary">Cari Pengajuan</button>
+    </form>
     <div class="table-responsive"><table class="table table-hover align-middle">
       <thead><tr><th>Kode / Pelanggan</th><th>Acara</th><th>Tanggal</th><th>Rekomendasi</th><th>Status</th><th>Aksi</th></tr></thead>
       <tbody>
         @forelse($pengajuan as $row)
-          <tr><td><strong>{{ $row->kode }}</strong><br><small>{{ $row->nama_pelanggan }} · {{ $row->no_hp }}</small></td>
+          <tr><td><strong>{{ \App\Support\KodePengajuan::dari($row) }}</strong><br><small>{{ $row->nama_pelanggan }} · {{ $row->no_hp }}</small></td>
           <td>{{ ucwords(str_replace('_',' ',$row->jenis_acara)) }}</td>
           <td>{{ date('d/m/Y',strtotime($row->tanggal_acara)) }}</td>
           <td>{{ match($row->rekomendasi_paket) {'paket2500'=>'Paket 2500','paket5000'=>'Paket 5000',default=>'Custom'} }}</td>

@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Services\PelangganNomorService;
+use App\Support\KodePengajuan;
 use Illuminate\Validation\ValidationException;
 
 class PengajuanPublikController extends Controller
@@ -83,7 +84,7 @@ class PengajuanPublikController extends Controller
         $input = json_decode($pengajuan->kebutuhan_json, true) ?: [];
         $ringkasan = [
             'Halo JR Audio, saya ingin konsultasi pengajuan sewa.',
-            '*Kode pengajuan:* '.$pengajuan->kode,
+            '*Kode pengajuan:* '.KodePengajuan::dari($pengajuan),
             '*Nama:* '.$pengajuan->nama_pelanggan,
             '*Acara:* '.str_replace('_', ' ', $pengajuan->jenis_acara),
             '*Tanggal:* '.$pengajuan->tanggal_acara,

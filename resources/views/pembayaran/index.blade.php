@@ -2,7 +2,7 @@
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h3>Data Pembayaran</h3>
-    <a href="/admin/pembayaran/tambah" class="btn btn-primary">Tambah Pembayaran</a>
+    <div class="d-flex gap-2 flex-wrap"><a href="{{ route('pembayaran.pengingat.index') }}" class="btn btn-outline-warning">Pengingat DP</a><a href="/admin/pembayaran/tambah" class="btn btn-primary">Tambah Pembayaran</a></div>
 </div>
 
 <div class="card jr-form-card">
@@ -35,6 +35,7 @@
                         <td><span class="badge bg-secondary"><?= htmlspecialchars($row['status_konfirmasi']) ?></span></td>
                         <td>
                             <a href="/admin/transaksi/detail?id=<?= $row['id_transaksi'] ?>" class="btn btn-sm btn-info">Detail</a>
+                            @if(!empty($notifikasiIds[(int)$row['id_pembayaran']]))<a class="btn btn-sm btn-outline-success" href="{{ route('pembayaran.notifikasi.show',['id'=>$row['id_pembayaran']]) }}">Info WhatsApp</a>@endif
                         </td>
                     </tr>
                 <?php endforeach; ?>

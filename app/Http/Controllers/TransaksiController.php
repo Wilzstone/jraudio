@@ -36,7 +36,7 @@ class TransaksiController extends Controller
                 ->orderBy('id_pengajuan_detail')->get()->map(fn($r) => [
                     'tipe_item'=>$r->tipe_item, 'id_barang'=>$r->id_barang,
                     'nama_item_external'=>$r->nama_barang, 'sumber_external'=>$r->sumber_external,
-                    'qty'=>$r->qty, 'harga_satuan'=>0,
+                    'qty'=>$r->qty, 'harga_satuan'=>0, 'harga_mitra'=>null,
                 ])->all();
             $pilihanCrew = $pengajuan->pilihan_crew ?: ($pengajuan->rekomendasi_paket === 'custom' ? 'satuan' : $pengajuan->rekomendasi_paket);
             $namaPaket = match($pilihanCrew) {
@@ -64,6 +64,8 @@ class TransaksiController extends Controller
             'biaya_genset'=>'nullable|integer|min:0',
             'qty'=>'required|array|min:1','qty.*'=>'required|integer|min:1',
             'harga_manual_item.*'=>'nullable|integer|min:0',
+            'harga_mitra_item'=>'nullable|array',
+            'harga_mitra_item.*'=>'nullable|integer|min:0',
             'alamat_lokasi_acara'=>'nullable|string|max:2000',
             'link_google_maps'=>'nullable|url|starts_with:https://|max:2048',
             'kode_pengajuan'=>'nullable|string|max:32'
@@ -85,11 +87,12 @@ class TransaksiController extends Controller
             }
             $items=[];$types=$request->input('tipe_item',[]);
             $ids=$request->input('id_barang',[]);$names=$request->input('nama_item_external',[]);
-            $sources=$request->input('sumber_external',[]);$qty=$request->input('qty',[]);$harga=$request->input('harga_manual_item',[]);
+            $sources=$request->input('sumber_external',[]);$qty=$request->input('qty',[]);$harga=$request->input('harga_manual_item',[]);$hargaMitra=$request->input('harga_mitra_item',[]);
             foreach($qty as $i=>$n) $items[]=[
                 'tipe_item'=>$types[$i]??'Barang','id_barang'=>(int)($ids[$i]??0),
                 'nama_item_external'=>$names[$i]??'','sumber_external'=>$sources[$i]??'',
-                'qty'=>(int)$n,'harga_satuan'=>(int)($harga[$i]??0)
+                'qty'=>(int)$n,'harga_satuan'=>(int)($harga[$i]??0),
+                'harga_mitra'=>array_key_exists($i,$hargaMitra) && $hargaMitra[$i]!=='' ? (int)$hargaMitra[$i] : null
             ];
             if ($request->filled('kode_pengajuan')) {
                 $kode = (string)$request->input('kode_pengajuan');
@@ -111,7 +114,7 @@ class TransaksiController extends Controller
                         'tipe_item'=>$item['tipe_item'], 'id_barang'=>$item['id_barang'],
                         'nama_barang'=>$item['nama_item_external'],
                         'sumber_external'=>$item['sumber_external'], 'qty'=>$item['qty'],
-                        'harga_satuan'=>$item['harga_satuan'],
+                        'harga_satuan'=>$item['harga_satuan'], 'harga_mitra'=>$item['harga_mitra'],
                     ], $items),
                 ], (int)$request->user()->id_user);
                 return redirect('/admin/transaksi/detail?id='.$id)->with('info','Pengajuan disetujui. Transaksi Booking #'.$id.' berhasil dibuat.');

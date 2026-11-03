@@ -12,7 +12,8 @@ class LaporanController extends Controller
         $laporanTransaksi=$model->getLaporanTransaksi($tanggalMulai,$tanggalSelesai);
         $laporanPembayaran=$model->getLaporanPembayaran($tanggalMulai,$tanggalSelesai);
         $laporanBarang=$model->getLaporanBarang();
-        return view('laporan.index',compact('tanggalMulai','tanggalSelesai','ringkasan','laporanTransaksi','laporanPembayaran','laporanBarang'));
+        $laporanMitra=$model->getLaporanMitra($tanggalMulai,$tanggalSelesai);
+        return view('laporan.index',compact('tanggalMulai','tanggalSelesai','ringkasan','laporanTransaksi','laporanPembayaran','laporanBarang','laporanMitra'));
     }
     public function invoice(Request $request,LaporanModel $model) {
         $id=$request->integer('id');$transaksi=$model->getTransaksiById($id);

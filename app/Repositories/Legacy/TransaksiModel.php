@@ -17,8 +17,24 @@ class TransaksiModel
     }
     public function getAll(): array
     {
-        $stmt = $this->db->query("SELECT t.*, p.nama_pelanggan, k.nama_karyawan FROM transaksi t 
-        JOIN pelanggan p ON t.id_pelanggan=p.id_pelanggan JOIN karyawan k ON t.id_karyawan=k.id_karyawan ORDER BY t.id_transaksi DESC");
+        $stmt = $this->db->query("SELECT t.*, p.nama_pelanggan, k.nama_karyawan,
+        COALESCE(pb.terbayar_sewa,0) AS terbayar_sewa,
+        COALESCE(pd.total_denda,0) AS denda_transaksi,
+        COALESCE(pb.terbayar_denda,0) AS terbayar_denda
+        FROM transaksi t
+        JOIN pelanggan p ON t.id_pelanggan=p.id_pelanggan
+        JOIN karyawan k ON t.id_karyawan=k.id_karyawan
+        LEFT JOIN (
+          SELECT id_transaksi,
+           SUM(CASE WHEN jenis_pembayaran IN ('DP','Pelunasan') THEN jumlah_bayar ELSE 0 END) AS terbayar_sewa,
+           SUM(CASE WHEN jenis_pembayaran='Denda' THEN jumlah_bayar ELSE 0 END) AS terbayar_denda
+          FROM pembayaran WHERE status_konfirmasi='Dikonfirmasi' GROUP BY id_transaksi
+        ) pb ON pb.id_transaksi=t.id_transaksi
+        LEFT JOIN (
+          SELECT id_transaksi, SUM(denda+denda_manual) AS total_denda
+          FROM pengembalian GROUP BY id_transaksi
+        ) pd ON pd.id_transaksi=t.id_transaksi
+        ORDER BY t.id_transaksi DESC");
         return $stmt->fetchAll();
     }
     public function getById(int $id): ?array
@@ -75,12 +91,17 @@ class TransaksiModel
                     $nama = trim($item['nama_item_external'] ?? '');
                     $sumber = trim($item['sumber_external'] ?? '');
                     $harga = max(0, (int) ($item['harga_satuan'] ?? 0));
-                    if ($nama === '')
-                        throw new Exception('Nama item tambahan wajib diisi.');
+                    if (!array_key_exists('harga_mitra', $item) || $item['harga_mitra'] === null) {
+                        throw new Exception('Biaya sewa dari mitra wajib dicatat untuk setiap item luar (isi 0 jika gratis).');
+                    }
+                    $hargaMitra = (int)$item['harga_mitra'];
+                    if ($hargaMitra < 0) throw new Exception('Biaya mitra tidak boleh negatif. Harga modal lebih tinggi dari harga pelanggan akan ditampilkan sebagai margin negatif.');
+                    if ($nama === '' || $sumber === '')
+                        throw new Exception('Nama item dan nama mitra wajib diisi.');
                     $sub = $harga * $qty;
                     $totalExternal += $sub;
                     $detailFinal[] = ['tipe_item' => 'External', 'id_barang' => null, 'nama_item_external' => 
-                    $nama, 'sumber_external' => $sumber, 'qty' => $qty, 'harga_satuan' => $harga, 'subtotal' => $sub];
+                    $nama, 'sumber_external' => $sumber, 'qty' => $qty, 'harga_satuan' => $harga, 'harga_mitra' => $hargaMitra, 'subtotal' => $sub];
                     continue;
                 }
                 $idBarang = (int) ($item['id_barang'] ?? 0);
@@ -109,7 +130,7 @@ class TransaksiModel
                     $sub = 0;
                 }
                 $detailFinal[] = ['tipe_item' => 'Barang', 'id_barang' => $idBarang, 'nama_item_external' => null,
-                 'sumber_external' => null, 'qty' => $qty, 'harga_satuan' => $harga, 'subtotal' => $sub];
+                 'sumber_external' => null, 'qty' => $qty, 'harga_satuan' => $harga, 'harga_mitra' => null, 'subtotal' => $sub];
             }
             if (empty($detailFinal))
                 throw new Exception('Minimal pilih 1 barang atau item tambahan untuk transaksi.');
@@ -135,14 +156,14 @@ class TransaksiModel
                 ':alamat_lokasi_acara' => $data['alamat_lokasi_acara'] ?? null,
                 ':link_google_maps' => $data['link_google_maps'] ?? null]);
             $id = (int) $this->db->lastInsertId();
-            $ins = $this->db->prepare("INSERT INTO detail_transaksi (id_transaksi,id_barang,nama_item_external,sumber_external,qty,harga_satuan,subtotal,tipe_item)
-             VALUES (:id_transaksi,:id_barang,:nama_item_external,:sumber_external,:qty,:harga_satuan,:subtotal,:tipe_item)");
+            $ins = $this->db->prepare("INSERT INTO detail_transaksi (id_transaksi,id_barang,nama_item_external,sumber_external,qty,harga_satuan,harga_mitra,subtotal,tipe_item)
+             VALUES (:id_transaksi,:id_barang,:nama_item_external,:sumber_external,:qty,:harga_satuan,:harga_mitra,:subtotal,:tipe_item)");
             $stok = $this->db->prepare("UPDATE barang SET stok=stok-:q1, stok_disewa=stok_disewa+:q2, status=CASE WHEN (stok-:q3)>0 
             THEN 'Tersedia' ELSE 'Disewa' END WHERE id_barang=:id_barang AND stok>=:q4");
             foreach ($detailFinal as $d) {
                 $ins->execute([':id_transaksi' => $id, ':id_barang' => $d['id_barang'], ':nama_item_external' => 
                 $d['nama_item_external'], ':sumber_external' => $d['sumber_external'], ':qty' => $d['qty'], ':harga_satuan' => 
-                $d['harga_satuan'], ':subtotal' => $d['subtotal'], ':tipe_item' => $d['tipe_item']]);
+                $d['harga_satuan'], ':harga_mitra' => $d['harga_mitra'], ':subtotal' => $d['subtotal'], ':tipe_item' => $d['tipe_item']]);
                 if ($d['tipe_item'] === 'Barang') {
                     $stok->execute([':q1' => $d['qty'], ':q2' => $d['qty'], ':q3' => $d['qty'], ':q4' => $d['qty'], ':id_barang' => $d['id_barang']]);
                     if ($stok->rowCount() !== 1) {

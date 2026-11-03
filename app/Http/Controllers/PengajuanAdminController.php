@@ -11,11 +11,23 @@ class PengajuanAdminController extends Controller
     public function index(Request $request)
     {
         $status = $request->query('status', '');
+        $cari = trim((string)$request->query('cari',''));
         $query = DB::table('pengajuan_sewa')->orderByDesc('id_pengajuan');
+        if ($cari !== '') {
+            $query->where(function($q) use ($cari) {
+                if (preg_match('/^PGJ-(\d{6})-(\d+)$/i', $cari, $m)) {
+                    $q->where('id_pengajuan', (int)$m[2])
+                      ->whereDate('created_at', '20'.substr($m[1],0,2).'-'.substr($m[1],2,2).'-'.substr($m[1],4,2));
+                } else {
+                    $q->where('nama_pelanggan','like','%'.$cari.'%')
+                      ->orWhere('no_hp','like','%'.$cari.'%');
+                }
+            });
+        }
         if (in_array($status, ['Menunggu','Revisi','Disetujui','Batal'], true)) $query->where('status', $status);
         $pengajuan = $query->paginate(20)->withQueryString();
         $counts = DB::table('pengajuan_sewa')->select('status', DB::raw('COUNT(*) as jumlah'))->groupBy('status')->pluck('jumlah', 'status');
-        return view('admin.pengajuan.index', compact('pengajuan', 'counts', 'status'));
+        return view('admin.pengajuan.index', compact('pengajuan', 'counts', 'status', 'cari'));
     }
 
     public function show(string $kode)

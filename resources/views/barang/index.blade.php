@@ -14,7 +14,7 @@
         <div>
             <span class="ja-inventory-eyebrow">INVENTARIS / JR AUDIO</span>
             <h1 id="inventoryTitle">{{ $isOwner ? 'Data Barang' : 'Cek Ketersediaan Barang' }}</h1>
-            <p>{{ $isOwner ? 'Kelola inventaris dan pantau kondisi peralatan dalam satu halaman.' : 'Periksa jumlah unit yang tersedia, disewa, dan dalam perawatan.' }}</p>
+            <p>{{ $isOwner ? 'Kelola inventaris dan pantau kondisi peralatan dalam satu halaman.' : 'Periksa jumlah unit yang tersedia, disewa, dan dalam perawatan.' }} Status tampilan mengikuti stok tersedia, disewa, dan maintenance; satu jenis barang bisa mempunyai beberapa kondisi sekaligus.</p>
         </div>
         @if ($isOwner)
             <a class="btn ja-inventory-add" href="{{ url('/admin/barang/tambah') }}" aria-label="Tambah barang baru">
@@ -118,7 +118,7 @@
                             $disewa = (int) ($row['stok_disewa'] ?? 0);
                             $maintenance = (int) ($row['stok_maintenance'] ?? 0);
                             $fisik = $stok + $disewa + $maintenance;
-                            $status = (string) ($row['status'] ?? '-');
+                            $status = $stok > 0 ? 'Tersedia' : ($disewa > 0 ? 'Disewa' : ($maintenance > 0 ? 'Maintenance' : 'Stok Habis'));
                             $statusClass = $status === 'Tersedia' ? 'is-available' : ($status === 'Maintenance' ? 'is-service' : 'is-rented');
                             $name = (string) ($row['nama_barang'] ?? 'Barang');
                             $category = (string) ($row['kategori'] ?? '-');
