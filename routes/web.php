@@ -1,6 +1,7 @@
 <?php
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NotifikasiPembayaranController;
+use App\Http\Controllers\MitraController;
 use App\Http\Controllers\{AuthController, PublicController, BarangController, KaryawanController, PelangganController, DashboardController, TransaksiController, PembayaranController, PengembalianController, LaporanController, RekomendasiController, PengajuanPublikController, PengajuanAdminController};
 
 Route::get('/', [PublicController::class, 'index']);
@@ -32,6 +33,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/transaksi/simpan', [TransaksiController::class, 'store']);
     Route::get('/admin/transaksi/detail', [TransaksiController::class, 'show']);
     Route::post('/admin/transaksi/status', [TransaksiController::class, 'status']);
+    Route::post('/admin/transaksi/mitra-kembali', [TransaksiController::class, 'mitraKembali'])->name('transaksi.mitra.kembali');
     Route::get('/admin/pembayaran/tambah', [PembayaranController::class, 'create']);
     Route::post('/admin/pembayaran/simpan', [PembayaranController::class, 'store']);
     Route::get('/admin/pengembalian', [PengembalianController::class, 'index']);
@@ -39,6 +41,11 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('role:Owner')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index']);
+        Route::get('/admin/mitra', [MitraController::class, 'index'])->name('mitra.index');
+        Route::post('/admin/mitra/simpan', [MitraController::class, 'simpanMitra'])->name('mitra.simpan');
+        Route::post('/admin/mitra/{id}/update', [MitraController::class, 'updateMitra'])->whereNumber('id')->name('mitra.update');
+        Route::post('/admin/mitra/barang/simpan', [MitraController::class, 'simpanBarang'])->name('mitra.barang.simpan');
+        Route::post('/admin/mitra/barang/{id}/update', [MitraController::class, 'updateBarang'])->whereNumber('id')->name('mitra.barang.update');
         Route::get('/admin/barang/tambah', [BarangController::class, 'create']);
         Route::post('/admin/barang/simpan', [BarangController::class, 'store']);
         Route::get('/admin/barang/edit', [BarangController::class, 'edit']);

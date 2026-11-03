@@ -123,6 +123,18 @@
     </div>
 </div>
 
+@if(collect($detail)->contains(fn($r)=>$r['tipe_item']==='External' && !empty($r['id_barang_mitra'])))
+<div class="card mb-3"><div class="card-header">Pengembalian Barang ke Mitra</div><div class="card-body">
+<p class="text-muted small">Barang mitra tidak masuk stok JR Audio. Setelah pengembalian pelanggan selesai, catat pengembalian ke mitra secara terpisah.</p>
+<div class="table-responsive"><table class="table table-bordered align-middle"><thead><tr><th>Barang / Mitra</th><th>Jumlah</th><th>Status pengembalian ke mitra</th></tr></thead><tbody>
+@foreach($detail as $d) @if($d['tipe_item']==='External' && !empty($d['id_barang_mitra']))
+<tr><td>{{ $d['nama_item_external'] }}<br><small>{{ $d['sumber_external'] }}</small></td><td>{{ $d['qty'] }}</td><td>
+@if($d['dikembalikan_ke_mitra_at'])<span class="badge bg-success">Dikembalikan {{ $d['dikembalikan_ke_mitra_at'] }}</span>
+@elseif($data['status_transaksi']==='Selesai')<form method="POST" action="{{ route('transaksi.mitra.kembali') }}">@csrf<input type="hidden" name="id_detail" value="{{ $d['id_detail'] }}"><button class="btn btn-sm btn-outline-primary" data-jr-confirm="Pastikan barang sudah diterima kembali oleh mitra.">Tandai Sudah Kembali</button></form>
+@else<span class="badge bg-warning text-dark">Menunggu pengembalian pelanggan</span>@endif
+</td></tr>@endif @endforeach
+</tbody></table></div></div></div>
+@endif
 <div class="card mt-3">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span>Pembayaran</span>

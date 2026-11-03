@@ -5,6 +5,7 @@
         ? [
             ['Dashboard', '/dashboard', 'dashboard'],
             ['Barang', '/admin/barang', 'barang'],
+            ['Mitra', '/admin/mitra', 'barang'],
             ['Pelanggan', '/admin/pelanggan', 'pelanggan'],
             ['Karyawan', '/admin/karyawan', 'karyawan'],
             ['Transaksi', '/admin/transaksi', 'transaksi'],

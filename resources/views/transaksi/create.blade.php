@@ -74,12 +74,11 @@ foreach ($barang as $b) {
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5>Barang / Item yang Disewa</h5>
                 <div><button type="button" class="btn btn-sm btn-success" onclick="tambahBarisBarang()">+ Tambah
-                        Barang</button> <button type="button" class="btn btn-sm btn-warning"
-                        onclick="tambahBarisExternal()">+ Item Luar</button></div>
+                        Barang</button> <button type="button" class="btn btn-sm btn-warning" onclick="tambahBarisExternal()">+ Barang Mitra</button></div>
             </div>
             <div id="barang-wrapper"></div>
             <div class="border rounded p-3 mt-3 bg-light"><strong>Estimasi Total:</strong> <span id="preview_total">Rp
-                    0</span><br><small>Paketan: harga paket + genset + item mitra. Satuan: barang + genset + item mitra. Biaya mitra dicatat terpisah untuk laporan margin.</small></div>
+                    0</span><br><small>Paketan: harga paket + genset + barang mitra tambahan. Centang “Termasuk harga paket” bila barang mitra hanya menggantikan isi paket. Biaya mitra tetap tercatat.</small></div>
             <div class="jr-form-actions">
               <button type="submit" class="btn btn-primary">{{ $pengajuan ? 'Konfirmasi & Simpan Transaksi' : 'Simpan Transaksi' }}</button>
               <a href="{{ $pengajuan ? route('pengajuan.admin.show',['kode'=>$pengajuan->kode]) : url('/admin/transaksi') }}" class="btn btn-outline-secondary">{{ $pengajuan ? 'Kembali ke Pengajuan' : 'Kembali' }}</a>
@@ -91,7 +90,7 @@ foreach ($barang as $b) {
     <div class="row barang-row mb-2 align-items-start">
         <div class="col-md-2"><select name="tipe_item[]" class="form-select tipe-item" onchange="toggleRowType(this)">
                 <option value="Barang">Barang</option>
-                <option value="External">Item Luar</option>
+                <option value="External">Barang Mitra</option>
             </select></div>
         <div class="col-md-3 barang-field"><select name="id_barang[]" class="form-select barang-select">
                 <option value="">-- Pilih Barang --</option><?php foreach ($barang as $b): ?>
@@ -100,14 +99,20 @@ foreach ($barang as $b) {
                         <?= (int) $b['stok'] ?> | Rp <?= number_format((int) $b['harga_sewa'], 0, ',', '.') ?></option>
                 <?php endforeach; ?>
             </select></div>
-        <div class="col-md-2 external-field"><input type="text" name="nama_item_external[]" class="form-control"
+        <div class="col-md-2 external-field"><select name="id_barang_mitra[]" class="form-select mitra-select" title="Pilih barang dari katalog mitra">
+          <option value="">-- Pilih barang mitra --</option>
+          @foreach($barangMitra as $m)<option value="{{ $m['id_barang_mitra'] }}">{{ $m['nama_mitra'] }} · {{ $m['nama_barang'] }}</option>@endforeach
+          </select><input type="text" name="nama_item_external[]" class="form-control"
                 placeholder="Nama item luar, contoh: Tenda"><input type="text" name="sumber_external[]"
                 class="form-control mt-1" placeholder="Pinjam/sewa dari mana?"></div>
         <div class="col-md-1"><input type="number" name="qty[]" class="form-control qty-input" min="1" value="1"
                 required></div>
         <div class="col-md-1 external-field"><input type="number" name="harga_manual_item[]"
                 class="form-control harga-manual-item" min="0" value="0" placeholder="Harga pelanggan" title="Harga sewa yang ditagihkan kepada pelanggan per unit"></div>
-        <div class="col-md-2 external-field"><input type="number" name="harga_mitra_item[]" class="form-control harga-mitra-item" min="0" placeholder="Biaya mitra" title="Biaya sewa yang dibayarkan kepada mitra per unit, isi 0 bila gratis"></div>
+        <div class="col-md-2 external-field"><input type="number" name="harga_mitra_item[]" class="form-control harga-mitra-item" min="0" placeholder="Biaya mitra" title="Biaya mitra per unit">
+          <label class="form-check small mt-2 paket-inclusion"><input type="checkbox" class="form-check-input paket-inclusion-check" onchange="this.closest('.external-field').querySelector('.paket-inclusion-value').value=this.checked?'1':'0';hitungPreview()"> Termasuk harga paket</label>
+          <input type="hidden" name="termasuk_paket_item[]" class="paket-inclusion-value" value="0">
+        </div>
         <div class="col-md-1"><button type="button" class="btn btn-danger w-100" onclick="hapusBaris(this)">X</button>
         </div>
     </div>
@@ -115,17 +120,26 @@ foreach ($barang as $b) {
 <script>
     const paketDetail = @json($paketDetail); const idGenset = @json((string)$idGenset);
     const isPengajuan = @json((bool)$pengajuan);
-    const prefillItems = @json($prefillItems);
+    const prefillItems = @json($prefillItems); const barangMitra = @json($barangMitra);
     function rupiah(v) { return 'Rp ' + Number(v || 0).toLocaleString('id-ID') }
     function tambahBarisBarang(id = '', qty = 1) { const c = document.getElementById('template-barang').content.cloneNode(true); const r = c.querySelector('.barang-row'); r.querySelector('.tipe-item').value = 'Barang'; r.querySelector('.barang-select').value = id; r.querySelector('.qty-input').value = qty; document.getElementById('barang-wrapper').appendChild(c); refreshRows(); window.JRMoney?.refresh() }
-    function tambahBarisExternal(nama = '', sumber = '', qty = 1, harga = 0, hargaMitra = '') { const c = document.getElementById('template-barang').content.cloneNode(true); const r = c.querySelector('.barang-row'); r.querySelector('.tipe-item').value = 'External'; r.querySelector('input[name="nama_item_external[]"]').value = nama; r.querySelector('input[name="sumber_external[]"]').value = sumber; r.querySelector('.qty-input').value = qty; r.querySelector('.harga-manual-item').value = harga; r.querySelector('.harga-mitra-item').value = hargaMitra; document.getElementById('barang-wrapper').appendChild(c); refreshRows(); window.JRMoney?.refresh() }
+    function tambahBarisExternal(nama = '', sumber = '', qty = 1, harga = 0, hargaMitra = '', idBarangMitra = '', termasukPaket = false) { const c = document.getElementById('template-barang').content.cloneNode(true); const r = c.querySelector('.barang-row'); r.querySelector('.tipe-item').value = 'External'; r.querySelector('.mitra-select').value = idBarangMitra || ''; if(idBarangMitra && hargaMitra === '') { const m=barangMitra.find(x=>String(x.id_barang_mitra)===String(idBarangMitra)); if(m){harga=m.harga_pelanggan;hargaMitra=m.harga_mitra;nama=m.nama_barang;sumber=m.nama_mitra;} } r.querySelector('input[name="nama_item_external[]"]').value = nama; r.querySelector('input[name="sumber_external[]"]').value = sumber; r.querySelector('.qty-input').value = qty; r.querySelector('.harga-manual-item').value = harga; r.querySelector('.harga-mitra-item').value = hargaMitra; r.querySelector('.paket-inclusion-check').checked=Boolean(termasukPaket);r.querySelector('.paket-inclusion-value').value=termasukPaket?'1':'0'; document.getElementById('barang-wrapper').appendChild(c); refreshRows(); window.JRMoney?.refresh(); toggleJenisTransaksi() }
+    function pilihBarangMitra(s) {
+        const m=barangMitra.find(x=>String(x.id_barang_mitra)===s.value); if(!m)return;
+        const r=s.closest('.barang-row');
+        r.querySelector('[name="nama_item_external[]"]').value=m.nama_barang;
+        r.querySelector('[name="sumber_external[]"]').value=m.nama_mitra;
+        r.querySelector('.harga-manual-item').value=m.harga_pelanggan;
+        r.querySelector('.harga-mitra-item').value=m.harga_mitra;
+        window.JRMoney?.refresh(); hitungPreview();
+    }
     function hapusBaris(b) { if (document.querySelectorAll('.barang-row').length > 1) b.closest('.barang-row').remove(); hitungPreview() }
     function toggleRowType(s) { const r = s.closest('.barang-row'), ex = s.value === 'External'; r.querySelectorAll('.barang-field').forEach(e => e.style.display = ex ? 'none' : ''); r.querySelectorAll('.external-field').forEach(e => e.style.display = ex ? '' : 'none'); r.querySelector('input[name="nama_item_external[]"]').required = ex; r.querySelector('.harga-mitra-item').required=ex; if (ex) r.querySelector('.barang-select').value = ''; hitungPreview() }
     function refreshRows() { document.querySelectorAll('.tipe-item').forEach(toggleRowType); hitungPreview() }
     function clearRows() { document.getElementById('barang-wrapper').innerHTML = '' }
     function loadPaketBarang() { const j = document.getElementById('jenis_transaksi').value, id = document.getElementById('id_paket').value; if (j !== 'Paketan' || !id || !paketDetail[id]) return; clearRows(); paketDetail[id].forEach(i => tambahBarisBarang(i.id_barang, i.qty)); cekGensetOtomatis(); if (!document.querySelector('.barang-row')) tambahBarisBarang(); refreshRows() }
     function cekGensetOtomatis() { if (isPengajuan) return; const biaya = window.JRMoney.parse(document.getElementById('biaya_genset').value); if (biaya <= 0 || !idGenset) return; let ada = false; document.querySelectorAll('.barang-row').forEach(r => { if (r.querySelector('.tipe-item').value === 'Barang' && r.querySelector('.barang-select').value === idGenset) ada = true }); if (!ada) tambahBarisBarang(idGenset, 1) }
-    function toggleJenisTransaksi() { const j = document.getElementById('jenis_transaksi').value; document.querySelectorAll('.paket-field').forEach(e => e.style.display = j === 'Paketan' ? '' : 'none'); document.getElementById('harga_paket_manual').required = j === 'Paketan'; document.getElementById('id_paket').required = j === 'Paketan' && !isPengajuan; hitungPreview() }
+    function toggleJenisTransaksi() { const j = document.getElementById('jenis_transaksi').value; document.querySelectorAll('.paket-field,.paket-inclusion').forEach(e => e.style.display = j === 'Paketan' ? '' : 'none'); document.getElementById('harga_paket_manual').required = j === 'Paketan'; document.getElementById('id_paket').required = j === 'Paketan' && !isPengajuan; hitungPreview() }
     function hitungPreview() {
         const j = document.getElementById('jenis_transaksi').value;
         const genset = window.JRMoney.parse(document.getElementById('biaya_genset').value);
@@ -140,7 +154,7 @@ foreach ($barang as $b) {
             const qty = Number(r.querySelector('.qty-input').value || 0);
 
             if (ex) {
-                total += qty * window.JRMoney.parse(r.querySelector('.harga-manual-item').value);
+                if(!(j==='Paketan' && r.querySelector('.paket-inclusion-value').value==='1'))total += qty * window.JRMoney.parse(r.querySelector('.harga-manual-item').value);
             } else if (j === 'Satuan') {
                 const s = r.querySelector('.barang-select');
                 const harga = Number(s.options[s.selectedIndex]?.dataset.harga || 0);
@@ -157,12 +171,12 @@ foreach ($barang as $b) {
         document.getElementById('preview_total').innerText = rupiah(total);
     }
     function updateTanggalKembaliLimit() { const s = document.getElementById('tanggal_sewa'), k = document.getElementById('tanggal_kembali'); if (!s.value) return; const d = new Date(s.value), m = new Date(d); m.setDate(m.getDate() + 7); const ms = m.toISOString().slice(0, 10); k.min = s.value; k.max = ms; if (!k.value || k.value < s.value) k.value = s.value; if (k.value > ms) k.value = ms }
-    document.addEventListener('input', e => { if (e.target.matches('.qty-input,#harga_paket_manual,#biaya_genset,.harga-manual-item')) { if (e.target.id === 'biaya_genset') cekGensetOtomatis(); hitungPreview() } }); document.addEventListener('change', e => { if (e.target.matches('.barang-select,.tipe-item')) hitungPreview() }); document.getElementById('jenis_transaksi').addEventListener('change', function () { toggleJenisTransaksi(); if (this.value === 'Paketan' && !isPengajuan) loadPaketBarang() }); document.getElementById('id_paket').addEventListener('change', () => { if(!isPengajuan) loadPaketBarang(); }); document.getElementById('tanggal_sewa').addEventListener('change', updateTanggalKembaliLimit); document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('input', e => { if (e.target.matches('.qty-input,#harga_paket_manual,#biaya_genset,.harga-manual-item')) { if (e.target.id === 'biaya_genset') cekGensetOtomatis(); hitungPreview() } }); document.addEventListener('change', e => { if(e.target.matches('.mitra-select'))pilihBarangMitra(e.target); if (e.target.matches('.barang-select,.tipe-item')) hitungPreview() }); document.getElementById('jenis_transaksi').addEventListener('change', function () { toggleJenisTransaksi(); if (this.value === 'Paketan' && !isPengajuan) loadPaketBarang() }); document.getElementById('id_paket').addEventListener('change', () => { if(!isPengajuan) loadPaketBarang(); }); document.getElementById('tanggal_sewa').addEventListener('change', updateTanggalKembaliLimit); document.addEventListener('DOMContentLoaded', () => {
         if (isPengajuan) {
             document.getElementById('jenis_transaksi').value = @json($oldJenis);
             prefillItems.forEach(i => {
                 if (i.tipe_item === 'Barang') tambahBarisBarang(String(i.id_barang || ''), i.qty);
-                else tambahBarisExternal(i.nama_item_external, i.sumber_external || '', i.qty, i.harga_satuan || 0, i.harga_mitra ?? '');
+                else tambahBarisExternal(i.nama_item_external, i.sumber_external || '', i.qty, i.harga_satuan || 0, i.harga_mitra ?? '', String(i.id_barang_mitra || ''), Boolean(i.termasuk_paket));
             });
             // Jenis (Satuan/Paketan) mengikuti pilihan crew yang tersimpan di pengajuan.
             document.getElementById('jenis_transaksi').disabled = true;

@@ -5,6 +5,8 @@ use Exception;
 use Throwable;
 use DateTime;
 use Illuminate\Support\Facades\DB;
+use App\Services\MitraCatalogService;
+use App\Services\MitraPricing;
 
 
 class TransaksiModel
@@ -88,8 +90,11 @@ class TransaksiModel
                 if ($qty <= 0)
                     continue;
                 if ($tipe === 'External') {
-                    $nama = trim($item['nama_item_external'] ?? '');
-                    $sumber = trim($item['sumber_external'] ?? '');
+                    $idBarangMitra = (int)($item['id_barang_mitra'] ?? 0);
+                    $catalog = $idBarangMitra ? MitraCatalogService::item($idBarangMitra) : null;
+                    // Jangan percaya input teks browser bila ID katalog dipilih.
+                    $nama = $catalog ? $catalog->nama_barang : trim($item['nama_item_external'] ?? '');
+                    $sumber = $catalog ? $catalog->nama_mitra : trim($item['sumber_external'] ?? '');
                     $harga = max(0, (int) ($item['harga_satuan'] ?? 0));
                     if (!array_key_exists('harga_mitra', $item) || $item['harga_mitra'] === null) {
                         throw new Exception('Biaya sewa dari mitra wajib dicatat untuk setiap item luar (isi 0 jika gratis).');
@@ -98,10 +103,11 @@ class TransaksiModel
                     if ($hargaMitra < 0) throw new Exception('Biaya mitra tidak boleh negatif. Harga modal lebih tinggi dari harga pelanggan akan ditampilkan sebagai margin negatif.');
                     if ($nama === '' || $sumber === '')
                         throw new Exception('Nama item dan nama mitra wajib diisi.');
-                    $sub = $harga * $qty;
+                    $included = MitraPricing::termasukPaket($jenis, !empty($item['termasuk_paket']));
+                    $sub = MitraPricing::subtotalPelanggan($harga, $qty, $jenis, $included);
                     $totalExternal += $sub;
                     $detailFinal[] = ['tipe_item' => 'External', 'id_barang' => null, 'nama_item_external' => 
-                    $nama, 'sumber_external' => $sumber, 'qty' => $qty, 'harga_satuan' => $harga, 'harga_mitra' => $hargaMitra, 'subtotal' => $sub];
+                    $nama, 'sumber_external' => $sumber, 'qty' => $qty, 'harga_satuan' => $harga, 'harga_mitra' => $hargaMitra, 'id_barang_mitra'=>$idBarangMitra ?: null, 'termasuk_paket'=>$included, 'subtotal' => $sub];
                     continue;
                 }
                 $idBarang = (int) ($item['id_barang'] ?? 0);
@@ -130,7 +136,7 @@ class TransaksiModel
                     $sub = 0;
                 }
                 $detailFinal[] = ['tipe_item' => 'Barang', 'id_barang' => $idBarang, 'nama_item_external' => null,
-                 'sumber_external' => null, 'qty' => $qty, 'harga_satuan' => $harga, 'harga_mitra' => null, 'subtotal' => $sub];
+                 'sumber_external' => null, 'qty' => $qty, 'harga_satuan' => $harga, 'harga_mitra' => null, 'id_barang_mitra'=>null, 'termasuk_paket'=>false, 'subtotal' => $sub];
             }
             if (empty($detailFinal))
                 throw new Exception('Minimal pilih 1 barang atau item tambahan untuk transaksi.');
@@ -156,14 +162,14 @@ class TransaksiModel
                 ':alamat_lokasi_acara' => $data['alamat_lokasi_acara'] ?? null,
                 ':link_google_maps' => $data['link_google_maps'] ?? null]);
             $id = (int) $this->db->lastInsertId();
-            $ins = $this->db->prepare("INSERT INTO detail_transaksi (id_transaksi,id_barang,nama_item_external,sumber_external,qty,harga_satuan,harga_mitra,subtotal,tipe_item)
-             VALUES (:id_transaksi,:id_barang,:nama_item_external,:sumber_external,:qty,:harga_satuan,:harga_mitra,:subtotal,:tipe_item)");
+            $ins = $this->db->prepare("INSERT INTO detail_transaksi (id_transaksi,id_barang,id_barang_mitra,nama_item_external,sumber_external,qty,harga_satuan,harga_mitra,termasuk_paket,subtotal,tipe_item)
+             VALUES (:id_transaksi,:id_barang,:id_barang_mitra,:nama_item_external,:sumber_external,:qty,:harga_satuan,:harga_mitra,:termasuk_paket,:subtotal,:tipe_item)");
             $stok = $this->db->prepare("UPDATE barang SET stok=stok-:q1, stok_disewa=stok_disewa+:q2, status=CASE WHEN (stok-:q3)>0 
             THEN 'Tersedia' ELSE 'Disewa' END WHERE id_barang=:id_barang AND stok>=:q4");
             foreach ($detailFinal as $d) {
-                $ins->execute([':id_transaksi' => $id, ':id_barang' => $d['id_barang'], ':nama_item_external' => 
+                $ins->execute([':id_transaksi' => $id, ':id_barang' => $d['id_barang'], ':id_barang_mitra' => $d['id_barang_mitra'], ':nama_item_external' => 
                 $d['nama_item_external'], ':sumber_external' => $d['sumber_external'], ':qty' => $d['qty'], ':harga_satuan' => 
-                $d['harga_satuan'], ':harga_mitra' => $d['harga_mitra'], ':subtotal' => $d['subtotal'], ':tipe_item' => $d['tipe_item']]);
+                $d['harga_satuan'], ':harga_mitra' => $d['harga_mitra'], ':termasuk_paket' => (int)$d['termasuk_paket'], ':subtotal' => $d['subtotal'], ':tipe_item' => $d['tipe_item']]);
                 if ($d['tipe_item'] === 'Barang') {
                     $stok->execute([':q1' => $d['qty'], ':q2' => $d['qty'], ':q3' => $d['qty'], ':q4' => $d['qty'], ':id_barang' => $d['id_barang']]);
                     if ($stok->rowCount() !== 1) {

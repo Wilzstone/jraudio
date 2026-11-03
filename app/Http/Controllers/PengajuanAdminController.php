@@ -5,6 +5,7 @@ use App\Services\PengajuanService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Throwable;
+use App\Services\MitraCatalogService;
 
 class PengajuanAdminController extends Controller
 {
@@ -56,11 +57,12 @@ class PengajuanAdminController extends Controller
         $initialItems = $detail->map(fn ($r) => [
             'tipe_item' => $r->tipe_item, 'id_barang' => $r->id_barang,
             'nama_barang' => $r->nama_barang, 'qty' => (int)$r->qty,
-            'sumber_external' => $r->sumber_external ?? '',
+            'sumber_external' => $r->sumber_external ?? '', 'id_barang_mitra' => $r->id_barang_mitra ?? null, 'termasuk_paket' => (bool)($r->termasuk_paket ?? false),
         ])->all();
         $inventoryOptions = $barang->map(fn ($b) => ['id_barang' => $b->id_barang, 'nama_barang' => $b->nama_barang, 'stok' => $b->stok])->values()->all();
         $formItemsClient = old('form_items', $initialItems);
-        return view('admin.pengajuan.show', compact('pengajuan', 'detail', 'barang', 'kebutuhan', 'pelangganTertaut', 'pilihanCrew', 'presetPaket', 'initialItems', 'inventoryOptions', 'formItemsClient'));
+        $barangMitra = MitraCatalogService::pilihan();
+        return view('admin.pengajuan.show', compact('pengajuan', 'detail', 'barang', 'kebutuhan', 'pelangganTertaut', 'pilihanCrew', 'presetPaket', 'initialItems', 'inventoryOptions', 'formItemsClient', 'barangMitra'));
     }
 
     public function simpan(Request $request, string $kode, PengajuanService $service)
@@ -76,9 +78,11 @@ class PengajuanAdminController extends Controller
             'form_items' => 'required|array|min:1|max:60',
             'form_items.*.tipe_item' => 'required|in:Barang,External',
             'form_items.*.id_barang' => 'nullable|integer|exists:barang,id_barang',
+            'form_items.*.id_barang_mitra'=>'nullable|integer|exists:barang_mitra,id_barang_mitra',
             'form_items.*.nama_barang' => 'required|string|max:150',
             'form_items.*.sumber_external' => 'nullable|string|max:150',
             'form_items.*.qty' => 'required|integer|min:1|max:10000',
+            'form_items.*.termasuk_paket'=>'nullable|boolean',
         ]);
         try {
             $id = $service->simpanDanProses($kode, $data, (int)$request->user()->id_user, false);
