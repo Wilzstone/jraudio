@@ -6,7 +6,7 @@
   const moneyNames = new Set([
     'harga_sewa', 'harga_paket_manual', 'harga_final', 'biaya_genset',
     'harga_manual_item', 'harga_mitra_item', 'jumlah_bayar', 'denda_manual', 'harga_satuan',
-    'biaya_transportasi', 'total_harga'
+    'biaya_transportasi', 'total_harga', 'harga_mitra', 'harga_pelanggan'
   ]);
   const digits = value => String(value == null ? '' : value).replace(/[^\d]/g, '');
   const parse = value => Number(digits(value) || '0');

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use App\Services\PengajuanService;
 use App\Services\PelangganNomorService;
 use App\Services\PembayaranWorkflowService;
+use App\Services\MitraCatalogService;
 class TransaksiController extends Controller
 {
     public function index(TransaksiModel $model) {$transaksi=$model->getAll();return view('transaksi.index',compact('transaksi'));}
@@ -36,7 +37,7 @@ class TransaksiController extends Controller
                 ->orderBy('id_pengajuan_detail')->get()->map(fn($r) => [
                     'tipe_item'=>$r->tipe_item, 'id_barang'=>$r->id_barang,
                     'nama_item_external'=>$r->nama_barang, 'sumber_external'=>$r->sumber_external,
-                    'qty'=>$r->qty, 'harga_satuan'=>0, 'harga_mitra'=>null,
+                    'qty'=>$r->qty, 'id_barang_mitra'=>$r->id_barang_mitra ?? null, 'harga_satuan'=>0, 'harga_mitra'=>null,'termasuk_paket'=>(bool)($r->termasuk_paket ?? false),
                 ])->all();
             $pilihanCrew = $pengajuan->pilihan_crew ?: ($pengajuan->rekomendasi_paket === 'custom' ? 'satuan' : $pengajuan->rekomendasi_paket);
             $namaPaket = match($pilihanCrew) {
@@ -52,7 +53,8 @@ class TransaksiController extends Controller
                 'tanggal_kembali'=>max($pengajuan->tanggal_acara,date('Y-m-d')),
             ], $old);
         }
-        return view('transaksi.create',compact('pelanggan','barang','paket','paketDetail','old','pengajuan','prefillItems'));
+        $barangMitra=MitraCatalogService::pilihan();
+        return view('transaksi.create',compact('pelanggan','barang','paket','paketDetail','old','pengajuan','prefillItems','barangMitra'));
     }
     public function store(Request $request,TransaksiModel $model) {
         $request->validate([
@@ -65,6 +67,8 @@ class TransaksiController extends Controller
             'qty'=>'required|array|min:1','qty.*'=>'required|integer|min:1',
             'harga_manual_item.*'=>'nullable|integer|min:0',
             'harga_mitra_item'=>'nullable|array',
+            'termasuk_paket_item'=>'nullable|array', 'termasuk_paket_item.*'=>'nullable|in:0,1',
+            'id_barang_mitra'=>'nullable|array', 'id_barang_mitra.*'=>'nullable|integer|exists:barang_mitra,id_barang_mitra',
             'harga_mitra_item.*'=>'nullable|integer|min:0',
             'alamat_lokasi_acara'=>'nullable|string|max:2000',
             'link_google_maps'=>'nullable|url|starts_with:https://|max:2048',
@@ -87,11 +91,13 @@ class TransaksiController extends Controller
             }
             $items=[];$types=$request->input('tipe_item',[]);
             $ids=$request->input('id_barang',[]);$names=$request->input('nama_item_external',[]);
-            $sources=$request->input('sumber_external',[]);$qty=$request->input('qty',[]);$harga=$request->input('harga_manual_item',[]);$hargaMitra=$request->input('harga_mitra_item',[]);
+            $sources=$request->input('sumber_external',[]);$qty=$request->input('qty',[]);$harga=$request->input('harga_manual_item',[]);$hargaMitra=$request->input('harga_mitra_item',[]);$mitraIds=$request->input('id_barang_mitra',[]);$included=$request->input('termasuk_paket_item',[]);
             foreach($qty as $i=>$n) $items[]=[
                 'tipe_item'=>$types[$i]??'Barang','id_barang'=>(int)($ids[$i]??0),
                 'nama_item_external'=>$names[$i]??'','sumber_external'=>$sources[$i]??'',
                 'qty'=>(int)$n,'harga_satuan'=>(int)($harga[$i]??0),
+                'id_barang_mitra'=>($types[$i]??'Barang')==='External' && !empty($mitraIds[$i]) ? (int)$mitraIds[$i] : null,
+                'termasuk_paket'=>($types[$i]??'Barang')==='External' && !empty($included[$i]),
                 'harga_mitra'=>array_key_exists($i,$hargaMitra) && $hargaMitra[$i]!=='' ? (int)$hargaMitra[$i] : null
             ];
             if ($request->filled('kode_pengajuan')) {
@@ -115,6 +121,7 @@ class TransaksiController extends Controller
                         'nama_barang'=>$item['nama_item_external'],
                         'sumber_external'=>$item['sumber_external'], 'qty'=>$item['qty'],
                         'harga_satuan'=>$item['harga_satuan'], 'harga_mitra'=>$item['harga_mitra'],
+                        'id_barang_mitra'=>$item['id_barang_mitra'] ?? null, 'termasuk_paket'=>$item['termasuk_paket'] ?? false,
                     ], $items),
                 ], (int)$request->user()->id_user);
                 return redirect('/admin/transaksi/detail?id='.$id)->with('info','Pengajuan disetujui. Transaksi Booking #'.$id.' berhasil dibuat.');
@@ -149,6 +156,21 @@ class TransaksiController extends Controller
         $sisaBayar=$ringkasan['sisa_total'];
         $isSelesai=$data['status_transaksi']==='Selesai';
         return view('transaksi.show',compact('data','detail','pembayaran','totalBayar','totalDenda','totalTagihan','sisaBayar','isSelesai','ringkasan'));
+    }
+    /** Pengembalian ke mitra tidak menyentuh inventaris JR Audio. */
+    public function mitraKembali(Request $request) {
+        $data=$request->validate(['id_detail'=>'required|integer|exists:detail_transaksi,id_detail']);
+        try {
+            DB::transaction(function () use ($data) {
+                $d=DB::table('detail_transaksi as d')->join('transaksi as t','t.id_transaksi','=','d.id_transaksi')
+                    ->where('d.id_detail',$data['id_detail'])->select('d.*','t.status_transaksi')->lockForUpdate()->first();
+                if(!$d || $d->tipe_item!=='External' || !$d->id_barang_mitra) throw new \RuntimeException('Barang ini bukan barang katalog mitra.');
+                if($d->status_transaksi!=='Selesai') throw new \RuntimeException('Selesaikan proses pengembalian pelanggan terlebih dahulu.');
+                if(!$d->dikembalikan_ke_mitra_at) DB::table('detail_transaksi')->where('id_detail',$d->id_detail)->whereNull('dikembalikan_ke_mitra_at')
+                    ->update(['dikembalikan_ke_mitra_at'=>now()]);
+            });
+            return back()->with('info','Pengembalian ke mitra berhasil dicatat.');
+        } catch(Throwable $e) { return back()->with('error',$e->getMessage()); }
     }
     public function status(Request $request,TransaksiModel $model) {
         $data=$request->validate(['id_transaksi'=>'required|integer|exists:transaksi,id_transaksi','status_transaksi'=>'required|in:Berjalan,Batal']);

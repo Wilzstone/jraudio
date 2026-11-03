@@ -6,6 +6,8 @@ use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
 use App\Services\PelangganNomorService;
 use RuntimeException;
+use App\Services\MitraCatalogService;
+use App\Services\MitraPricing;
 
 class PengajuanService
 {
@@ -41,14 +43,17 @@ class PengajuanService
                 foreach ($data['form_items'] as $item) {
                     $jenis = ($item['tipe_item'] ?? '') === 'External' ? 'External' : 'Barang';
                     $idBarang = $jenis === 'Barang' ? (int)($item['id_barang'] ?? 0) : null;
+                    $idBarangMitra = $jenis === 'External' ? (int)($item['id_barang_mitra'] ?? 0) : 0;
+                    $catalog = $idBarangMitra ? MitraCatalogService::item($idBarangMitra) : null;
                     if ($jenis === 'Barang' && $idBarang < 1) throw new RuntimeException('Barang katalog wajib dipilih.');
                     $edited[] = [
-                        'id_pengajuan_detail' => null, 'tipe_item' => $jenis, 'id_barang' => $idBarang,
-                        'nama_barang' => trim((string)($item['nama_barang'] ?? '')),
-                        'sumber_external' => $jenis === 'External' ? trim((string)($item['sumber_external'] ?? '')) : null,
+                        'id_pengajuan_detail' => null, 'tipe_item' => $jenis, 'id_barang' => $idBarang, 'id_barang_mitra' => $idBarangMitra ?: null,
+                        'nama_barang' => $catalog ? $catalog->nama_barang : trim((string)($item['nama_barang'] ?? '')),
+                        'sumber_external' => $catalog ? $catalog->nama_mitra : ($jenis === 'External' ? trim((string)($item['sumber_external'] ?? '')) : null),
                         'qty' => (int)($item['qty'] ?? 0),
                         'harga_satuan' => $jenis === 'External' ? max(0,(int)($item['harga_satuan'] ?? 0)) : 0,
                         'harga_mitra' => $jenis === 'External' ? ($item['harga_mitra'] ?? null) : null,
+                        'termasuk_paket'=>$jenis === 'External' && !empty($item['termasuk_paket']),
                     ];
                 }
                 if (!$edited) throw new RuntimeException('Tambahkan paling sedikit satu perlengkapan.');
@@ -63,7 +68,7 @@ class PengajuanService
                 $idBarang = $jenis === 'Barang' ? (int)($edit['id_barang'] ?? 0) : null;
                 if ($jenis === 'Barang' && $idBarang < 1) throw new RuntimeException('Pilih barang katalog atau ubah sumber menjadi Mitra/External.');
                 $edited[] = [
-                    'id_pengajuan_detail' => $row->id_pengajuan_detail, 'tipe_item' => $jenis,
+                    'id_pengajuan_detail' => $row->id_pengajuan_detail, 'tipe_item' => $jenis, 'id_barang_mitra'=>$row->id_barang_mitra ?? null, 'termasuk_paket'=>(bool)($row->termasuk_paket ?? false),
                     'id_barang' => $idBarang,
                     'nama_barang' => trim((string)$edit['nama_barang']),
                     'sumber_external' => $jenis === 'External' ? trim((string)($edit['sumber_external'] ?? '')) : null,
@@ -90,9 +95,9 @@ class PengajuanService
                     $r['nama_barang'] = DB::table('barang')->where('id_barang', $r['id_barang'])->value('nama_barang') ?: $r['nama_barang'];
                 }
                 $payload = [
-                    'tipe_item' => $r['tipe_item'], 'id_barang' => $r['id_barang'], 'nama_barang' => $r['nama_barang'],
+                    'tipe_item' => $r['tipe_item'], 'id_barang' => $r['id_barang'], 'id_barang_mitra'=>$r['id_barang_mitra'] ?? null, 'nama_barang' => $r['nama_barang'],
                     'sumber_external' => $r['sumber_external'], 'qty' => $r['qty'],
-                    'jumlah_vendor' => $r['tipe_item'] === 'External' ? $r['qty'] : 0, 'updated_at' => now(),
+                    'jumlah_vendor' => $r['tipe_item'] === 'External' ? $r['qty'] : 0, 'termasuk_paket'=>$r['tipe_item']==='External' && !empty($r['termasuk_paket']), 'updated_at' => now(),
                 ];
                 if ($r['id_pengajuan_detail']) {
                     DB::table('pengajuan_detail')->where('id_pengajuan_detail', $r['id_pengajuan_detail'])->update($payload);
@@ -124,7 +129,7 @@ class PengajuanService
                 throw new RuntimeException('Jenis transaksi tidak sesuai pilihan crew yang telah disimpan.');
             }
             $biayaBarangLuar = 0;
-            foreach ($edited as $r) if ($r['tipe_item'] === 'External') $biayaBarangLuar += (int)($r['harga_satuan'] ?? 0) * $r['qty'];
+            foreach ($edited as $r) if ($r['tipe_item'] === 'External') $biayaBarangLuar += MitraPricing::subtotalPelanggan((int)($r['harga_satuan'] ?? 0), $r['qty'], $jenisFinal, !empty($r['termasuk_paket']));
             $biayaGenset = (int)($data['biaya_genset'] ?? 0);
             if ($biayaGenset < 0) throw new RuntimeException('Biaya genset tidak valid.');
             $hargaFinal = (int)($data['harga_final'] ?? 0);
@@ -204,9 +209,11 @@ class PengajuanService
                     'id_barang' => $external ? null : $r['id_barang'],
                     'nama_item_external' => $external ? $r['nama_barang'] : null,
                     'sumber_external' => $external ? $r['sumber_external'] : null,
+                    'id_barang_mitra'=>$external ? ($r['id_barang_mitra'] ?? null) : null,
                     'qty' => $r['qty'], 'harga_satuan' => $hargaSatuan,
                     'harga_mitra' => $external ? (int)($r['harga_mitra'] ?? 0) : null,
-                    'subtotal' => $hargaSatuan * $r['qty'],
+                    'termasuk_paket'=>$external && $jenisFinal === 'Paketan' && !empty($r['termasuk_paket']),
+                    'subtotal' => $external ? MitraPricing::subtotalPelanggan($hargaSatuan, $r['qty'], $jenisFinal, !empty($r['termasuk_paket'])) : $hargaSatuan * $r['qty'],
                     'tipe_item' => $r['tipe_item'],
                 ]);
             }
@@ -246,7 +253,7 @@ class PengajuanService
         $biayaLuar = 0;
         foreach (($data['form_items'] ?? []) as $item) {
             if (($item['tipe_item'] ?? '') === 'External') {
-                $biayaLuar += (int)$item['qty'] * (int)($item['harga_satuan'] ?? 0);
+                $biayaLuar += MitraPricing::subtotalPelanggan((int)($item['harga_satuan'] ?? 0), (int)$item['qty'], $jenis, !empty($item['termasuk_paket']));
             }
         }
         // Untuk Satuan, harga final dihitung ulang dari stok/harga katalog di dalam lock transaksi.

@@ -35,7 +35,7 @@
   @if(in_array($pengajuan->status, ['Menunggu','Revisi']))
   <form method="POST" action="{{ route('pengajuan.admin.simpan',['kode'=>$pengajuan->kode]) }}" class="jr-pengajuan-panel" id="jrReviewForm">@csrf
     <h2>Konfirmasi Perlengkapan</h2>
-    <p class="text-muted mb-3">Crew dapat memilih paket yang sesuai atau menggunakan satuan, kemudian menambah dan menyesuaikan perlengkapan sebelum transaksi dibuat.</p>
+    <p class="text-muted mb-3">Pilih Paket atau Satuan, kemudian tentukan barang internal atau katalog mitra. Jika barang mitra menggantikan alat yang termasuk paket, centang <b>Termasuk harga paket</b> agar tidak dihitung dua kali.</p>
     @if($errors->any())<div class="alert alert-danger">{{ $errors->first() }}</div>@endif
     <div class="row g-3 mb-3">
       <div class="col-md-6">
@@ -51,7 +51,7 @@
     </div>
     <div class="table-responsive">
       <table class="table table-hover align-middle" id="jrReviewItemsTable">
-        <thead><tr><th style="min-width:150px">Sumber</th><th style="min-width:220px">Barang katalog / nama item</th><th style="min-width:90px">Jumlah</th><th style="min-width:180px">Nama mitra (jika External)</th><th>Aksi</th></tr></thead>
+        <thead><tr><th style="min-width:150px">Sumber</th><th style="min-width:220px">Barang katalog / nama item</th><th style="min-width:90px">Jumlah</th><th style="min-width:200px">Mitra / Katalog</th><th>Aksi</th></tr></thead>
         <tbody id="jrReviewItems"></tbody>
       </table>
     </div>
@@ -77,7 +77,7 @@
   </form>
   <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const inventory = @json($inventoryOptions);
+    const inventory = @json($inventoryOptions); const mitraCatalog = @json($barangMitra);
     const presets = @json($presetPaket);
     const initial = @json($formItemsClient);
     const target = document.getElementById('jrReviewItems');
@@ -108,13 +108,21 @@
       const name=field('input',`form_items[${idx}][nama_barang]`,data.nama_barang || '',{placeholder:'Nama item / perlengkapan'});
       const cell=td(product);cell.appendChild(name); name.classList.add('mt-1');
       const qty=field('input',`form_items[${idx}][qty]`,data.qty || 1,{type:'number',min:'1'});qty.max=10000;td(qty);
-      const vendor=field('input',`form_items[${idx}][sumber_external]`,data.sumber_external || '', {placeholder:'Nama vendor (jika dari mitra)'});td(vendor);
+      const catalog=field('select',`form_items[${idx}][id_barang_mitra]`,data.id_barang_mitra || '',{choices:[['','-- Pilih dari katalog --'],...mitraCatalog.map(m=>[String(m.id_barang_mitra),m.nama_mitra+' · '+m.nama_barang])]});
+      const vendor=field('input',`form_items[${idx}][sumber_external]`,data.sumber_external || '', {placeholder:'Nama mitra (manual / data lama)'});
+      const vendorCell=td(catalog);vendor.classList.add('mt-1');vendorCell.appendChild(vendor);
+      const includedHidden=document.createElement('input');includedHidden.type='hidden';includedHidden.name=`form_items[${idx}][termasuk_paket]`;includedHidden.value=data.termasuk_paket?'1':'0';vendorCell.appendChild(includedHidden);
+      const includedLabel=document.createElement('label');includedLabel.className='form-check small mt-2';
+      const includedCheck=document.createElement('input');includedCheck.type='checkbox';includedCheck.className='form-check-input';includedCheck.checked=Boolean(data.termasuk_paket);
+      includedLabel.appendChild(includedCheck);includedLabel.appendChild(document.createTextNode(' Termasuk harga paket'));vendorCell.appendChild(includedLabel);
+      includedCheck.onchange=()=>{includedHidden.value=includedCheck.checked?'1':'0';markDirty();};
       const remove=document.createElement('button'); remove.type='button';remove.className='btn btn-outline-danger btn-sm';remove.textContent='Hapus';remove.onclick=()=>{tr.remove(); renumber();markDirty();};td(remove);
       function sync() {
-        const external=source.value==='External';product.hidden=external;name.hidden=!external;vendor.disabled=!external;
+        const external=source.value==='External';product.hidden=external;name.hidden=!external;vendor.disabled=!external;catalog.hidden=!external;catalog.disabled=!external;includedLabel.hidden=!external;includedHidden.disabled=!external;
         product.required=!external;name.required=external;
         if(!external){const b=inventory.find(b=>String(b.id_barang)===product.value); name.value=b?.nama_barang || '';}
       }
+      catalog.addEventListener('change',()=>{const m=mitraCatalog.find(m=>String(m.id_barang_mitra)===catalog.value);if(m){name.value=m.nama_barang;vendor.value=m.nama_mitra;}markDirty();});
       source.addEventListener('change',()=>{sync();markDirty();});
       product.addEventListener('change',()=>{sync();markDirty();});
       tr.addEventListener('input',markDirty);

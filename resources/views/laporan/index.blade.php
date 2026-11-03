@@ -105,23 +105,32 @@
 <div class="card mb-4">
  <div class="card-header">Harga Sewa & Proyeksi Margin Barang Mitra</div>
  <div class="card-body">
-  <p class="text-muted">Margin = harga tagihan mitra ke pelanggan - biaya sewa dari mitra. Ini <strong>margin kotor</strong>, bukan laba bersih; tidak memasukkan transport, crew, dan biaya operasional. Angka hanya untuk transaksi tidak batal pada rentang tanggal transaksi.</p>
+  <p class="text-muted">Biaya mitra adalah pengeluaran yang diperkirakan berdasarkan harga modal saat transaksi. Untuk barang mitra yang <strong>sudah termasuk paket</strong>, tidak ada alokasi harga jual per item, sehingga margin item <strong>tidak dihitung</strong>. Margin terpisah bukan laba bersih; seluruh data berdasarkan transaksi non-batal di periode ini.</p>
   @php
     $mitraDiketahui=collect($laporanMitra)->filter(fn($r)=>$r['harga_mitra']!==null);
     $belumAdaBiaya=collect($laporanMitra)->filter(fn($r)=>$r['harga_mitra']===null)->count();
+    $dapatHitungMargin=$mitraDiketahui->filter(fn($r)=>$r['margin']!==null);
+    $perMitra=collect($laporanMitra)->groupBy(fn($r)=>$r['sumber_external'] ?: 'Tidak diketahui');
   @endphp
   <div class="row g-2 mb-3">
-   <div class="col-md-4"><div class="border rounded p-3"><small>Nilai Tagihan Mitra (Biaya Tercatat)</small><h5>Rp {{ number_format($mitraDiketahui->sum('total_jual'),0,',','.') }}</h5></div></div>
+   <div class="col-md-4"><div class="border rounded p-3"><small>Tagihan Barang Mitra Terpisah</small><h5>Rp {{ number_format($dapatHitungMargin->sum('total_jual'),0,',','.') }}</h5></div></div>
    <div class="col-md-4"><div class="border rounded p-3"><small>Biaya ke Mitra</small><h5>Rp {{ number_format($mitraDiketahui->sum('biaya_mitra'),0,',','.') }}</h5></div></div>
-   <div class="col-md-4"><div class="border rounded p-3"><small>Margin Kotor Mitra</small><h5>Rp {{ number_format($mitraDiketahui->sum('margin'),0,',','.') }}</h5></div></div>
+   <div class="col-md-4"><div class="border rounded p-3"><small>Margin Item Mitra Berharga Terpisah</small><h5>Rp {{ number_format($dapatHitungMargin->sum('margin'),0,',','.') }}</h5></div></div>
   </div>
   @if($belumAdaBiaya)<div class="alert alert-warning">{{ $belumAdaBiaya }} baris mitra lama belum memiliki catatan biaya mitra; tidak dihitung dalam total margin di atas.</div>@endif
   <div class="table-responsive"><table class="table table-striped table-bordered align-middle"><thead><tr><th>Transaksi</th><th>Item / Mitra</th><th>Qty</th><th>Harga Pelanggan / Unit</th><th>Biaya Mitra / Unit</th><th>Margin Kotor</th></tr></thead><tbody>
   @forelse($laporanMitra as $r)
    <tr><td>#{{ $r['id_transaksi'] }}<br><small>{{ $r['tanggal_transaksi'] }}</small></td>
    <td>{{ $r['nama_barang'] }}<br><small>{{ $r['sumber_external'] }}</small></td><td>{{ $r['qty'] }}</td><td>Rp {{ number_format($r['harga_pelanggan'],0,',','.') }}</td>
-   <td>{{ $r['harga_mitra']===null ? 'Belum Dicatat' : 'Rp '.number_format($r['harga_mitra'],0,',','.') }}</td><td>{{ $r['margin']===null ? '-' : 'Rp '.number_format($r['margin'],0,',','.') }}</td></tr>
+   <td>{{ $r['harga_mitra']===null ? 'Belum Dicatat' : 'Rp '.number_format($r['harga_mitra'],0,',','.') }}</td><td>{{ $r['margin']===null ? 'Termasuk harga paket' : 'Rp '.number_format($r['margin'],0,',','.') }}</td></tr>
   @empty <tr><td colspan="6" class="text-center">Belum ada item mitra dalam periode ini.</td></tr> @endforelse
+  </tbody></table></div>
+  <h6 class="mt-4">Rekap Biaya per Mitra</h6>
+  <div class="table-responsive"><table class="table table-bordered align-middle"><thead><tr><th>Nama mitra</th><th>Baris barang</th><th>Biaya tercatat</th><th>Biaya belum ada</th><th>Margin item berharga terpisah</th></tr></thead><tbody>
+  @forelse($perMitra as $nama=>$rows)
+  @php $tercatat=$rows->filter(fn($r)=>$r['harga_mitra']!==null);@endphp
+  <tr><td>{{ $nama }}</td><td>{{ $rows->count() }}</td><td>Rp {{ number_format($tercatat->sum('biaya_mitra'),0,',','.') }}</td><td>{{ $rows->count()-$tercatat->count() }}</td><td>Rp {{ number_format($tercatat->filter(fn($r)=>$r['margin']!==null)->sum('margin'),0,',','.') }}</td></tr>
+  @empty<tr><td colspan="5" class="text-muted text-center">Belum ada data mitra pada periode ini.</td></tr>@endforelse
   </tbody></table></div>
  </div>
 </div>

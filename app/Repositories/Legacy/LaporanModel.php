@@ -19,7 +19,7 @@ class LaporanModel
     {
         $stmt = $this->db->prepare("SELECT
                 COUNT(*) AS total_transaksi,
-                COALESCE(SUM(total_harga), 0) AS total_nilai_transaksi,
+                COALESCE(SUM(CASE WHEN status_transaksi <> 'Batal' THEN total_harga ELSE 0 END), 0) AS total_nilai_transaksi,
                 SUM(CASE WHEN status_transaksi = 'Booking' THEN 1 ELSE 0 END) AS total_booking,
                 SUM(CASE WHEN status_transaksi = 'Berjalan' THEN 1 ELSE 0 END) AS total_berjalan,
                 SUM(CASE WHEN status_transaksi = 'Selesai' THEN 1 ELSE 0 END) AS total_selesai,
@@ -50,7 +50,7 @@ class LaporanModel
             JOIN pelanggan p ON t.id_pelanggan = p.id_pelanggan
             JOIN karyawan k ON t.id_karyawan = k.id_karyawan
             LEFT JOIN (
-                SELECT id_transaksi, SUM(jumlah_bayar) AS total_bayar
+                SELECT id_transaksi, SUM(CASE WHEN jenis_pembayaran IN ('DP','Pelunasan') THEN jumlah_bayar ELSE 0 END) AS total_bayar
                 FROM pembayaran
                 WHERE status_konfirmasi = 'Dikonfirmasi'
                 GROUP BY id_transaksi
@@ -82,10 +82,12 @@ class LaporanModel
     public function getLaporanMitra(string $mulai, string $selesai): array
     {
         $stmt = $this->db->prepare("SELECT dt.id_detail, t.id_transaksi, t.tanggal_transaksi,
-            p.nama_pelanggan, dt.nama_item_external AS nama_barang, dt.sumber_external,
+            p.nama_pelanggan, dt.nama_item_external AS nama_barang, dt.sumber_external, dt.id_barang_mitra, t.jenis_transaksi, dt.termasuk_paket, dt.dikembalikan_ke_mitra_at,
             dt.qty, dt.harga_satuan AS harga_pelanggan, dt.harga_mitra,
-            dt.subtotal AS total_jual, (dt.qty * dt.harga_mitra) AS biaya_mitra,
-            (dt.subtotal - dt.qty * dt.harga_mitra) AS margin
+            CASE WHEN t.jenis_transaksi='Paketan' AND dt.termasuk_paket=1 THEN NULL ELSE dt.subtotal END AS total_jual,
+            (dt.qty * dt.harga_mitra) AS biaya_mitra,
+            CASE WHEN t.jenis_transaksi='Paketan' AND dt.termasuk_paket=1 THEN NULL
+                 ELSE (dt.subtotal - dt.qty * dt.harga_mitra) END AS margin
             FROM detail_transaksi dt
             JOIN transaksi t ON t.id_transaksi=dt.id_transaksi
             JOIN pelanggan p ON p.id_pelanggan=t.id_pelanggan
@@ -105,11 +107,12 @@ class LaporanModel
                 COALESCE(dt.total_pemasukan_barang, 0) AS total_pemasukan_barang
             FROM barang b
             LEFT JOIN (
-                SELECT id_barang, SUM(qty) AS total_disewa,
-                       SUM(subtotal) AS total_pemasukan_barang
-                FROM detail_transaksi
-                WHERE id_barang IS NOT NULL
-                GROUP BY id_barang
+                SELECT d.id_barang, SUM(d.qty) AS total_disewa,
+                       SUM(d.subtotal) AS total_pemasukan_barang
+                FROM detail_transaksi d
+                JOIN transaksi t ON t.id_transaksi=d.id_transaksi
+                WHERE d.id_barang IS NOT NULL AND t.status_transaksi <> 'Batal'
+                GROUP BY d.id_barang
             ) dt ON b.id_barang = dt.id_barang
             ORDER BY b.nama_barang ASC");
         return $stmt->fetchAll();

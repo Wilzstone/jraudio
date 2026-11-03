@@ -64,6 +64,12 @@
                 </article>
             </section>
 
+            <section class="ja-metrics" aria-label="Ringkasan mitra" style="margin-top:16px">
+                <article class="ja-metric"><div class="ja-metric-top"><span>Biaya barang mitra</span><span class="ja-metric-icon">▣</span></div><div class="ja-metric-value ja-money">{{ $rupiah($mitraRingkas['biaya']) }}</div><div class="ja-metric-foot">Proyeksi biaya pada {{ $angka($mitraRingkas['baris']) }} baris barang mitra non-batal</div></article>
+                <article class="ja-metric"><div class="ja-metric-top"><span>Margin barang mitra terpisah</span><span class="ja-metric-icon">↗</span></div><div class="ja-metric-value ja-money">{{ $rupiah($mitraRingkas['margin_terpisah']) }}</div><div class="ja-metric-foot">Belum termasuk margin barang mitra yang tercakup harga paket</div></article>
+                <article class="ja-metric"><div class="ja-metric-top"><span>Biaya mitra belum dicatat</span><span class="ja-metric-icon">!</span></div><div class="ja-metric-value">{{ $angka($mitraRingkas['belum_tercatat']) }}</div><div class="ja-metric-foot">Lengkapi biaya transaksi lama di laporan jika perlu</div></article>
+            </section>
+            <p class="ja-muted ja-small" style="margin:8px 0 18px">Metrik mitra mengikuti tanggal transaksi dan bukan laba bersih. Omzet penerimaan di atas mengikuti tanggal pembayaran terkonfirmasi; keduanya tidak boleh langsung dikurangkan.</p>
             <section class="ja-dashboard-grid">
                 <article class="ja-panel ja-revenue">
                     <div class="ja-panel-header">
