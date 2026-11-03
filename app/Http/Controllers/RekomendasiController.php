@@ -45,7 +45,7 @@ class RekomendasiController extends Controller
             'rundown' => 'nullable|string|max:1500',
             'durasi_jam' => 'required|integer|min:1|max:96',
             'anggaran' => 'required|integer|min:0|max:1000000000',
-            'tanggal_acara' => 'required|date|after_or_equal:today',
+            'tanggal_acara' => ['required','date','after_or_equal:'.\Carbon\Carbon::today('Asia/Jakarta')->toDateString()],
             'butuh_genset' => 'nullable|boolean',
         ]);
         $input['butuh_genset'] = $request->boolean('butuh_genset');

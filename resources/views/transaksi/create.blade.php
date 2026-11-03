@@ -3,7 +3,7 @@
     <div><div class="jr-form-eyebrow">PENYEWAAN / JR AUDIO</div><h3>{{ $pengajuan ? 'Konfirmasi & Buat Transaksi' : 'Tambah Transaksi Penyewaan' }}</h3><p class="jr-form-help">{{ $pengajuan ? 'Data dari pengajuan '. \App\Support\KodePengajuan::dari($pengajuan) .' sudah diisi. Periksa kembali sebelum disimpan.' : 'Lengkapi data penyewaan dan periksa rincian biaya.' }}</p></div>
 </div>
 <?php
-$today = date('Y-m-d');
+$today = \Carbon\Carbon::today('Asia/Jakarta')->toDateString();
 $oldJenis = $old['jenis_transaksi'] ?? 'Satuan';
 $oldPaket = $old['id_paket'] ?? '';
 $idGenset = '';

@@ -47,7 +47,7 @@
             <input name="durasi_jam" type="number" min="1" max="96" required value="{{ old('durasi_jam',12) }}">
           </label>
           <label>Tanggal acara
-            <input name="tanggal_acara" type="date" min="{{ date('Y-m-d') }}" required value="{{ old('tanggal_acara','') }}">
+            <input name="tanggal_acara" type="date" min="{{ \Carbon\Carbon::today('Asia/Jakarta')->toDateString() }}" required value="{{ old('tanggal_acara','') }}">
           </label>
           <label>Nama tempat acara <small>(opsional)</small>
             <input name="lokasi_acara" type="text" maxlength="180" value="{{ old('lokasi_acara','') }}" placeholder="Contoh: Gedung Mrican">

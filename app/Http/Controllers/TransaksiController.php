@@ -49,8 +49,8 @@ class TransaksiController extends Controller
                 'jenis_transaksi'=>$pilihanCrew === 'satuan' ? 'Satuan' : 'Paketan', 'id_paket'=>$p['id_paket'] ?? '',
                 'harga_paket_manual'=>$pilihanCrew === 'satuan' ? 0 : max(0,(int)($pengajuan->harga_final ?? $pengajuan->estimasi_min ?? 0) - (int)$pengajuan->biaya_genset),
                 'biaya_genset'=>$pengajuan->biaya_genset,
-                'tanggal_sewa'=>max($pengajuan->tanggal_acara,date('Y-m-d')),
-                'tanggal_kembali'=>max($pengajuan->tanggal_acara,date('Y-m-d')),
+                'tanggal_sewa'=>max($pengajuan->tanggal_acara,\Carbon\Carbon::today('Asia/Jakarta')->toDateString()),
+                'tanggal_kembali'=>max($pengajuan->tanggal_acara,\Carbon\Carbon::today('Asia/Jakarta')->toDateString()),
             ], $old);
         }
         $barangMitra=MitraCatalogService::pilihan();
@@ -131,7 +131,7 @@ class TransaksiController extends Controller
                 'jenis_transaksi'=>$jenis,'id_paket'=>$idPaket,'nama_paket'=>$namaPaket,
                 'harga_paket_manual'=>$request->integer('harga_paket_manual'),
                 'biaya_genset'=>$request->integer('biaya_genset'),
-                'tanggal_transaksi'=>date('Y-m-d'),'tanggal_sewa'=>$request->input('tanggal_sewa'),
+                'tanggal_transaksi'=>\Carbon\Carbon::today('Asia/Jakarta')->toDateString(),'tanggal_sewa'=>$request->input('tanggal_sewa'),
                 'tanggal_kembali'=>$request->input('tanggal_kembali'),
                 'status_transaksi'=>'Booking',
                 'alamat_lokasi_acara'=>$request->input('alamat_lokasi_acara'),

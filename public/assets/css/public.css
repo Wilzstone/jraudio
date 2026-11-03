@@ -40,3 +40,15 @@ body{font-size:16px;line-height:1.65}
 .footer-bottom{font-size:12.5px}
 @media(max-width:900px){.section,.portfolio-band{padding-top:56px;padding-bottom:56px}.page-hero{padding-top:60px;padding-bottom:60px}}
 @media(max-width:600px){body{font-size:15.5px}.section,.portfolio-band{padding-top:47px;padding-bottom:47px}.page-hero{padding-top:50px;padding-bottom:50px}.hero-copy>p,.page-hero p,.section-heading p{font-size:15px}.equipment-body h3{font-size:14px;min-height:0}.product-category,.stock-indicator{font-size:11px}.button{font-size:13.5px}}
+
+/* JR Audio v11 — menu game & pengenal merk; icon non-globe */
+.main-navigation>a.nav-game{color:#9a2e15}
+.main-navigation>a.nav-game:hover,.main-navigation>a.nav-game.is-active{color:var(--red)}
+.horeg-promo-section{background:#17191f;color:#f4f4f4;padding:56px 0}
+.horeg-promo{display:flex;align-items:center;gap:32px}
+.horeg-promo-mark{background:linear-gradient(145deg,#ec2b30,#a51822);border-radius:20px;color:#fff;font-size:48px;font-weight:900;width:140px;min-height:140px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 18px 48px rgba(0,0,0,.16)}
+.horeg-promo-mark span{font-size:32px;margin-left:4px}
+.horeg-promo-copy{max-width:710px}
+.horeg-promo-copy h2{font-size:clamp(25px,3vw,39px);color:#fff;line-height:1.2;margin:8px 0 12px}
+.horeg-promo-copy p{color:#d2d2d7;margin:0 0 20px;line-height:1.75}
+@media(max-width:600px){.horeg-promo{flex-direction:column;align-items:flex-start;gap:17px}.horeg-promo-mark{min-height:76px;width:90px;font-size:28px;border-radius:13px}.horeg-promo-mark span{font-size:24px}.horeg-promo-copy p{font-size:14px}}
