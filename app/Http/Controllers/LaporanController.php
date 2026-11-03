@@ -7,7 +7,7 @@ class LaporanController extends Controller
     public function index(Request $request,LaporanModel $model) {
         $request->validate(['tanggal_mulai'=>'nullable|date','tanggal_selesai'=>'nullable|date|after_or_equal:tanggal_mulai']);
         $tanggalMulai=$request->input('tanggal_mulai',date('Y-m-01'));
-        $tanggalSelesai=$request->input('tanggal_selesai',date('Y-m-d'));
+        $tanggalSelesai=$request->input('tanggal_selesai',\Carbon\Carbon::today('Asia/Jakarta')->toDateString());
         $ringkasan=$model->getRingkasan($tanggalMulai,$tanggalSelesai);
         $laporanTransaksi=$model->getLaporanTransaksi($tanggalMulai,$tanggalSelesai);
         $laporanPembayaran=$model->getLaporanPembayaran($tanggalMulai,$tanggalSelesai);

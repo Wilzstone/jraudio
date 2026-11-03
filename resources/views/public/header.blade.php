@@ -7,13 +7,15 @@
     <meta name="description" content="JR Audio menyediakan penyewaan sound system, paket audio, dan Smart Recommendation untuk kebutuhan berbagai acara.">
     <title>@yield('title', 'JR Audio | Sound System untuk Setiap Acara')</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('assets/img/jr-favicon.svg') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="apple-touch-icon" href="{{ asset('assets/img/jr-touch-icon.png') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/public.css') }}?v=3.0">
-    <link rel="stylesheet" href="{{ asset('assets/css/smart.css') }}?v=3.0">
+    <link rel="stylesheet" href="{{ asset('assets/css/smart.css') }}?v=5.0">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Lewati navigasi</a>
 @php
-$waNav = 'https://wa.me/6282331745445?text='.rawurlencode('Halo JR Audio, saya ingin konsultasi penyewaan sound system.');
+$waNav = 'https://wa.me/'.preg_replace('/\D+/', '', (string)config('jraudio.whatsapp_number')).'?text='.rawurlencode('Halo JR Audio, saya ingin konsultasi penyewaan sound system.');
 @endphp
 <div class="topline"><div class="container topline-inner"><span><span class="live-dot"></span> Sound System & Event Equipment</span><a href="{{ $waNav }}" target="_blank" rel="noopener noreferrer">Butuh bantuan memilih alat? <strong>Chat JR Audio ↗</strong></a></div></div>
 <header class="site-header" id="site-header">
@@ -27,6 +29,7 @@ $waNav = 'https://wa.me/6282331745445?text='.rawurlencode('Halo JR Audio, saya i
             <a href="{{ url('/barang') }}" class="{{ request()->is('barang') ? 'is-active' : '' }}" @if(request()->is('barang')) aria-current="page" @endif>Katalog</a>
             <a href="{{ url('/paket') }}" class="{{ request()->is('paket') ? 'is-active' : '' }}" @if(request()->is('paket')) aria-current="page" @endif>Paket</a>
             <a href="{{ route('rekomendasi.index') }}" class="{{ request()->is('rekomendasi') ? 'is-active' : '' }} nav-smart" @if(request()->is('rekomendasi')) aria-current="page" @endif><span class="spark-icon">✦</span> Smart Recommendation</a>
+            <a href="{{ route('game.horeg') }}" class="nav-game {{ request()->routeIs('game.horeg') ? 'is-active' : '' }}" aria-label="Buka Horeg Simulator 3D">♫ Horeg Simulator</a>
             <a href="{{ url('/galeri') }}" class="{{ request()->is('galeri') ? 'is-active' : '' }}" @if(request()->is('galeri')) aria-current="page" @endif>Galeri</a>
             <a href="{{ url('/tentang') }}" class="{{ request()->is('tentang') ? 'is-active' : '' }}" @if(request()->is('tentang')) aria-current="page" @endif>Tentang</a>
             <a class="mobile-contact" href="{{ url('/kontak') }}">Kontak</a>

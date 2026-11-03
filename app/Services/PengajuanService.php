@@ -119,7 +119,7 @@ class PengajuanService
             }
             $tanggalSewa = Carbon::parse($data['tanggal_sewa'])->startOfDay();
             $tanggalKembali = Carbon::parse($data['tanggal_kembali'])->startOfDay();
-            if ($tanggalSewa->lt(Carbon::today()) || $tanggalKembali->lt($tanggalSewa) || $tanggalKembali->gt($tanggalSewa->copy()->addDays(7))) {
+            if ($tanggalSewa->lt(Carbon::today('Asia/Jakarta')) || $tanggalKembali->lt($tanggalSewa) || $tanggalKembali->gt($tanggalSewa->copy()->addDays(7))) {
                 throw new RuntimeException('Tanggal sewa minimal hari ini dan tanggal kembali maksimal H+7.');
             }
             $karyawan = DB::table('karyawan')->where('id_user', $idUser)->first();
@@ -190,7 +190,7 @@ class PengajuanService
                 'jenis_transaksi' => $jenisFinal, 'id_paket' => $paket->id_paket ?? null,
                 'nama_paket' => $namaPaket,
                 'harga_paket_manual' => $hargaPaketManual, 'biaya_genset' => $biayaGenset,
-                'tanggal_transaksi' => now()->toDateString(),
+                'tanggal_transaksi' => Carbon::today('Asia/Jakarta')->toDateString(),
                 'tanggal_sewa' => $tanggalSewa->toDateString(), 'tanggal_kembali' => $tanggalKembali->toDateString(),
                 'status_transaksi' => 'Booking', 'total_harga' => $hargaFinal,
                 'alamat_lokasi_acara' => $data['alamat_lokasi_acara'] ?? null,

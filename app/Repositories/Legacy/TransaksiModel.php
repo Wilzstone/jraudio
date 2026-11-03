@@ -62,7 +62,7 @@ class TransaksiModel
     }
     private function validasiTanggal(string $tanggalSewa, string $tanggalKembali): void
     {
-        $today = new DateTime(date('Y-m-d'));
+        $today = new DateTime(\Carbon\Carbon::today('Asia/Jakarta')->toDateString());
         $sewa = new DateTime($tanggalSewa);
         $kembali = new DateTime($tanggalKembali);
         if ($sewa < $today)

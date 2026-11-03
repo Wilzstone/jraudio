@@ -130,7 +130,7 @@ class PengembalianModel
 
             $stok = $this->db->prepare("UPDATE barang SET
                     stok = stok + :qty_baik_update,
-                    stok_disewa = GREATEST(stok_disewa - :qty_total_update, 0),
+                    stok_disewa = stok_disewa - :qty_total_update,
                     stok_maintenance = stok_maintenance + :qty_rusak_update,
                     status = CASE
                         WHEN (stok + :qty_baik_status) > 0 THEN 'Tersedia'
@@ -138,7 +138,7 @@ class PengembalianModel
                         WHEN (stok_maintenance + :qty_rusak_status) > 0 THEN 'Maintenance'
                         ELSE 'Tersedia'
                     END
-                WHERE id_barang = :id_barang");
+                WHERE id_barang = :id_barang AND stok_disewa >= :qty_guard");
 
             foreach ($items as $item) {
                 $idDetail = (int) $item['id_detail'];
@@ -170,7 +170,11 @@ class PengembalianModel
                     ':qty_total_status' => $qtyTotal,
                     ':qty_rusak_status' => $qtyRusak,
                     ':id_barang' => (int) $item['id_barang'],
+                    ':qty_guard' => $qtyTotal,
                 ]);
+                if ($stok->rowCount() !== 1) {
+                    throw new Exception('Stok disewa tidak sesuai rincian transaksi. Pengembalian dibatalkan agar tidak mengembalikan stok dua kali.');
+                }
             }
 
             $status = $this->db->prepare("UPDATE transaksi SET status_transaksi = 'Selesai' WHERE id_transaksi = ?");

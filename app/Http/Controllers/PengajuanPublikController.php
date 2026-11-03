@@ -32,7 +32,7 @@ class PengajuanPublikController extends Controller
         $hash = hash('sha256', $data['draft_token']);
         $id = DB::table('pengajuan_sewa')->where('token_hash', $hash)->value('kode');
         if (!$id) {
-            $kode = 'JR-'.date('ymd').'-'.Str::upper(Str::random(12));
+            $kode = 'JR-'.\Carbon\Carbon::today('Asia/Jakarta')->format('ymd').'-'.Str::upper(Str::random(12));
             try {
                 DB::transaction(function () use ($data, $input, $hasil, $kode, $hash) {
                     $nomor = PelangganNomorService::normalisasi($data['no_hp']);

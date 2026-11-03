@@ -26,6 +26,17 @@
     <div class="smart-demo" aria-label="Gambaran langkah Smart Recommendation"><div class="demo-top"><span><span class="spark-icon">✦</span> JR SMART SYSTEM</span><span>HOW IT WORKS</span></div><div class="demo-line"><span class="demo-num">01</span><div><b>Ceritakan acaramu</b><small>Jenis acara, lokasi, peserta, anggaran</small></div><span>↗</span></div><div class="demo-line"><span class="demo-num">02</span><div><b>Dapatkan rekomendasi</b><small>Daftar barang + jumlah dan alasan</small></div><span>↗</span></div><div class="demo-line"><span class="demo-num">03</span><div><b>Konsultasi lebih lanjut</b><small>Konfirmasi ketersediaan dan kebutuhan</small></div><span>↗</span></div><div class="demo-bottom"><span class="live-dot"></span> SMART RECOMMENDATION IS READY <strong>✦</strong></div></div>
   </div>
 </section>
+<section class="section horeg-promo-section" aria-labelledby="horeg-heading">
+  <div class="container horeg-promo">
+    <div class="horeg-promo-mark" aria-hidden="true">JR<span>♫</span></div>
+    <div class="horeg-promo-copy">
+      <span class="eyebrow">SIMULASI INTERAKTIF 3D</span>
+      <h2 id="horeg-heading">Coba Horeg Simulator 3D</h2>
+      <p>Pilih kendaraan, susun perlengkapan sound dan lighting, pilih kru, lalu jalankan parade virtual. Game ini untuk hiburan dan tidak membuat pesanan penyewaan.</p>
+      <a class="button button-red" href="{{ route('game.horeg') }}">Main Horeg Simulator <span aria-hidden="true">↗</span></a>
+    </div>
+  </div>
+</section>
 <section class="section section-ivory" aria-labelledby="featured-heading"><div class="container">
   <div class="section-heading"><div><span class="eyebrow">OUR EQUIPMENT</span><h2 id="featured-heading">Perlengkapan <span>unggulan.</span></h2><p>Jelajahi beberapa alat yang terdaftar di katalog JR Audio.</p></div><a class="arrow-link" href="{{ url('/barang') }}">Lihat semua katalog <span aria-hidden="true">↗</span></a></div>
   @if(!empty($barang))
