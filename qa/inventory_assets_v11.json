@@ -1,0 +1,467 @@
+{
+  "catatan": "Tidak ada file yang dihapus. Deteksi tidak membuktikan file tidak terpakai.",
+  "files": [
+    {
+      "file": ".htaccess",
+      "size_kb": 0.5,
+      "status": "KANDIDAT REVIEW MANUAL",
+      "catatan": "Tidak ditemukan referensi literal; periksa browser/network dan database sebelum hapus"
+    },
+    {
+      "file": "assets/css/admin-custom.css",
+      "size_kb": 1.6,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/css/admin-data-tables.css",
+      "size_kb": 6.5,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/css/admin-forms-v5.css",
+      "size_kb": 3.9,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/css/admin-inventory.css",
+      "size_kb": 10.8,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/css/admin-pengajuan.css",
+      "size_kb": 2.6,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/css/admin-shell.css",
+      "size_kb": 7.5,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/css/bootstrap.min.css",
+      "size_kb": 226.7,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/css/dashboard-analytics.css",
+      "size_kb": 12.6,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/css/login-admin.css",
+      "size_kb": 4.3,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/css/public.css",
+      "size_kb": 29.5,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/css/smart.css",
+      "size_kb": 10.7,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/css/sweetalert2.min.css",
+      "size_kb": 29.9,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/horeg/boot-v080.js",
+      "size_kb": 3.0,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/horeg/brand/logo-invoice.png",
+      "size_kb": 139.6,
+      "status": "KANDIDAT REVIEW MANUAL",
+      "catatan": "Tidak ditemukan referensi literal; periksa browser/network dan database sebelum hapus"
+    },
+    {
+      "file": "assets/horeg/crew/adit-face.jpg",
+      "size_kb": 21.3,
+      "status": "DIPAKAI DINAMIS / CEK GAME",
+      "catatan": "Aset crew atau audio dimuat oleh kode game secara dinamis"
+    },
+    {
+      "file": "assets/horeg/crew/adit.jpg",
+      "size_kb": 43.8,
+      "status": "DIPAKAI DINAMIS / CEK GAME",
+      "catatan": "Aset crew atau audio dimuat oleh kode game secara dinamis"
+    },
+    {
+      "file": "assets/horeg/crew/andra-face.jpg",
+      "size_kb": 15.2,
+      "status": "DIPAKAI DINAMIS / CEK GAME",
+      "catatan": "Aset crew atau audio dimuat oleh kode game secara dinamis"
+    },
+    {
+      "file": "assets/horeg/crew/andra.jpg",
+      "size_kb": 35.1,
+      "status": "DIPAKAI DINAMIS / CEK GAME",
+      "catatan": "Aset crew atau audio dimuat oleh kode game secara dinamis"
+    },
+    {
+      "file": "assets/horeg/crew/dika-face.jpg",
+      "size_kb": 28.4,
+      "status": "DIPAKAI DINAMIS / CEK GAME",
+      "catatan": "Aset crew atau audio dimuat oleh kode game secara dinamis"
+    },
+    {
+      "file": "assets/horeg/crew/dika.jpg",
+      "size_kb": 69.5,
+      "status": "DIPAKAI DINAMIS / CEK GAME",
+      "catatan": "Aset crew atau audio dimuat oleh kode game secara dinamis"
+    },
+    {
+      "file": "assets/horeg/crew/galen-face.jpg",
+      "size_kb": 18.6,
+      "status": "DIPAKAI DINAMIS / CEK GAME",
+      "catatan": "Aset crew atau audio dimuat oleh kode game secara dinamis"
+    },
+    {
+      "file": "assets/horeg/crew/galen.jpg",
+      "size_kb": 34.7,
+      "status": "DIPAKAI DINAMIS / CEK GAME",
+      "catatan": "Aset crew atau audio dimuat oleh kode game secara dinamis"
+    },
+    {
+      "file": "assets/horeg/crew/kepin-face.jpg",
+      "size_kb": 22.6,
+      "status": "DIPAKAI DINAMIS / CEK GAME",
+      "catatan": "Aset crew atau audio dimuat oleh kode game secara dinamis"
+    },
+    {
+      "file": "assets/horeg/crew/kepin.jpg",
+      "size_kb": 71.9,
+      "status": "DIPAKAI DINAMIS / CEK GAME",
+      "catatan": "Aset crew atau audio dimuat oleh kode game secara dinamis"
+    },
+    {
+      "file": "assets/horeg/crew/nio-face.jpg",
+      "size_kb": 23.5,
+      "status": "DIPAKAI DINAMIS / CEK GAME",
+      "catatan": "Aset crew atau audio dimuat oleh kode game secara dinamis"
+    },
+    {
+      "file": "assets/horeg/crew/nio.jpg",
+      "size_kb": 52.4,
+      "status": "DIPAKAI DINAMIS / CEK GAME",
+      "catatan": "Aset crew atau audio dimuat oleh kode game secara dinamis"
+    },
+    {
+      "file": "assets/horeg/garage-v080.css",
+      "size_kb": 15.2,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/horeg/garage-v080.js",
+      "size_kb": 88.7,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/horeg/motion-v080.mjs",
+      "size_kb": 4.7,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/horeg/music/kampung-beat.ogg",
+      "size_kb": 61.7,
+      "status": "DIPAKAI DINAMIS / CEK GAME",
+      "catatan": "Aset crew atau audio dimuat oleh kode game secara dinamis"
+    },
+    {
+      "file": "assets/horeg/music/parade-malam.ogg",
+      "size_kb": 61.8,
+      "status": "DIPAKAI DINAMIS / CEK GAME",
+      "catatan": "Aset crew atau audio dimuat oleh kode game secara dinamis"
+    },
+    {
+      "file": "assets/horeg/rules-v080.mjs",
+      "size_kb": 17.5,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/img/barang/.gitkeep",
+      "size_kb": 0.0,
+      "status": "DIPAKAI DINAMIS / CEK DB",
+      "catatan": "Nama foto barang disimpan di database; jangan hapus otomatis"
+    },
+    {
+      "file": "assets/img/barang/1779811083_19f5d4348f6b345de185da606ce5b8b4.jpg",
+      "size_kb": 348.0,
+      "status": "DIPAKAI DINAMIS / CEK DB",
+      "catatan": "Nama foto barang disimpan di database; jangan hapus otomatis"
+    },
+    {
+      "file": "assets/img/barang/1780331979_WhatsApp_Image_2026-06-01_at_21.08.00.jpeg",
+      "size_kb": 46.6,
+      "status": "DIPAKAI DINAMIS / CEK DB",
+      "catatan": "Nama foto barang disimpan di database; jangan hapus otomatis"
+    },
+    {
+      "file": "assets/img/barang/1780332002_WhatsApp_Image_2026-06-01_at_21.07.59.jpeg",
+      "size_kb": 32.1,
+      "status": "DIPAKAI DINAMIS / CEK DB",
+      "catatan": "Nama foto barang disimpan di database; jangan hapus otomatis"
+    },
+    {
+      "file": "assets/img/barang/1780332018_WhatsApp_Image_2026-06-01_at_21.02.29.jpeg",
+      "size_kb": 11.5,
+      "status": "DIPAKAI DINAMIS / CEK DB",
+      "catatan": "Nama foto barang disimpan di database; jangan hapus otomatis"
+    },
+    {
+      "file": "assets/img/barang/1780332031_WhatsApp_Image_2026-06-01_at_21.02.28__1_.jpeg",
+      "size_kb": 61.4,
+      "status": "DIPAKAI DINAMIS / CEK DB",
+      "catatan": "Nama foto barang disimpan di database; jangan hapus otomatis"
+    },
+    {
+      "file": "assets/img/barang/1780332043_WhatsApp_Image_2026-06-01_at_21.02.28.jpeg",
+      "size_kb": 10.9,
+      "status": "DIPAKAI DINAMIS / CEK DB",
+      "catatan": "Nama foto barang disimpan di database; jangan hapus otomatis"
+    },
+    {
+      "file": "assets/img/barang/1780332058_WhatsApp_Image_2026-06-01_at_20.55.52.jpeg",
+      "size_kb": 24.4,
+      "status": "DIPAKAI DINAMIS / CEK DB",
+      "catatan": "Nama foto barang disimpan di database; jangan hapus otomatis"
+    },
+    {
+      "file": "assets/img/barang/1780332078_WhatsApp_Image_2026-06-01_at_20.53.28.jpeg",
+      "size_kb": 74.6,
+      "status": "DIPAKAI DINAMIS / CEK DB",
+      "catatan": "Nama foto barang disimpan di database; jangan hapus otomatis"
+    },
+    {
+      "file": "assets/img/barang/1780332094_WhatsApp_Image_2026-06-01_at_20.53.12__1_.jpeg",
+      "size_kb": 23.6,
+      "status": "DIPAKAI DINAMIS / CEK DB",
+      "catatan": "Nama foto barang disimpan di database; jangan hapus otomatis"
+    },
+    {
+      "file": "assets/img/barang/1780332108_WhatsApp_Image_2026-06-01_at_20.53.12.jpeg",
+      "size_kb": 158.2,
+      "status": "DIPAKAI DINAMIS / CEK DB",
+      "catatan": "Nama foto barang disimpan di database; jangan hapus otomatis"
+    },
+    {
+      "file": "assets/img/barang/1780332123_WhatsApp_Image_2026-06-01_at_20.53.11.jpeg",
+      "size_kb": 135.3,
+      "status": "DIPAKAI DINAMIS / CEK DB",
+      "catatan": "Nama foto barang disimpan di database; jangan hapus otomatis"
+    },
+    {
+      "file": "assets/img/barang/1780332139_WhatsApp_Image_2026-06-01_at_20.53.10.jpeg",
+      "size_kb": 166.1,
+      "status": "DIPAKAI DINAMIS / CEK DB",
+      "catatan": "Nama foto barang disimpan di database; jangan hapus otomatis"
+    },
+    {
+      "file": "assets/img/galeri/event1.jpeg",
+      "size_kb": 404.3,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/img/galeri/event2.jpeg",
+      "size_kb": 164.3,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/img/galeri/event3.jpeg",
+      "size_kb": 150.3,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/img/galeri/event4.jpg",
+      "size_kb": 95.6,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/img/jr-favicon.svg",
+      "size_kb": 0.3,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/img/jr-touch-icon.png",
+      "size_kb": 6.3,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/img/logo-jraudio.png",
+      "size_kb": 139.6,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/img/paket/1.png",
+      "size_kb": 202.1,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/img/paket/2.png",
+      "size_kb": 149.4,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/img/paket/genset.png",
+      "size_kb": 708.8,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/img/partner/assetpro.jpg",
+      "size_kb": 6.3,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/img/partner/elan.jpg",
+      "size_kb": 40.9,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/img/partner/hmaudio.jpg",
+      "size_kb": 8.3,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/img/partner/karawitan.jpg",
+      "size_kb": 8.0,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/img/partner/kholil.jpg",
+      "size_kb": 28.5,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/img/partner/komsospepak.jpg",
+      "size_kb": 5.6,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/img/partner/lakitenda.jpg",
+      "size_kb": 24.7,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/img/partner/unisa.png",
+      "size_kb": 204.5,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/js/admin-crud-v5.js",
+      "size_kb": 0.9,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/js/admin-data-tables.js",
+      "size_kb": 3.1,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/js/admin-inventory.js",
+      "size_kb": 2.7,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/js/admin-money-v6.js",
+      "size_kb": 4.0,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/js/admin-shell.js",
+      "size_kb": 1.0,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/js/public-ui.js",
+      "size_kb": 1.7,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/js/sweetalert2.min.js",
+      "size_kb": 54.8,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/video/.gitkeep",
+      "size_kb": 0.0,
+      "status": "KANDIDAT REVIEW MANUAL",
+      "catatan": "Tidak ditemukan referensi literal; periksa browser/network dan database sebelum hapus"
+    },
+    {
+      "file": "assets/video/vid1.mp4",
+      "size_kb": 2562.4,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "assets/video/vid2.mp4",
+      "size_kb": 3806.0,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "favicon.ico",
+      "size_kb": 7.1,
+      "status": "REFERENSI DITEMUKAN",
+      "catatan": "Nama/path ditemukan di kode sumber"
+    },
+    {
+      "file": "index.php",
+      "size_kb": 0.4,
+      "status": "KANDIDAT REVIEW MANUAL",
+      "catatan": "Tidak ditemukan referensi literal; periksa browser/network dan database sebelum hapus"
+    }
+  ],
+  "summary": {
+    "KANDIDAT REVIEW MANUAL": 4,
+    "REFERENSI DITEMUKAN": 45,
+    "DIPAKAI DINAMIS / CEK GAME": 14,
+    "DIPAKAI DINAMIS / CEK DB": 13
+  }
+}

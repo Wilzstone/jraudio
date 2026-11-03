@@ -6,6 +6,8 @@ use App\Http\Controllers\{AuthController, PublicController, BarangController, Ka
 
 Route::get('/', [PublicController::class, 'index']);
 Route::get('/home', [PublicController::class, 'index']);
+// Game publik independen dari database JR Audio; hanya menggunakan asset Three.js.
+Route::view('/game/horeg', 'games.horeg.garage')->name('game.horeg');
 foreach (['tentang','barang','lokasi','kontak','paket','galeri','partner'] as $halaman) {
     Route::get('/'.$halaman, [PublicController::class, $halaman]);
 }
